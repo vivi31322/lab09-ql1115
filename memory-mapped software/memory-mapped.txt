@@ -1,0 +1,138 @@
+## Lab 9-3-4 Software Design
+
+## To test whether CPU works correctly in Lab9-3
+
+.data
+## Martix A, B, C data as usual
+A:
+.byte 0 1 2 3 4 5
+
+B:
+.byte 0 1 2 3 4 5
+
+C:
+.byte 0 0 0 0 0 0 0 0 0
+
+## define parameter for memory space which accelerator can access
+ACCEL_REG_BASE_ADDR:
+.word 0x100000
+
+ACCEL_BUF_BASE_ADDR:
+.word 0x200000
+
+REG_ROFFSET_ENABLE:
+.word 0x0
+
+REG_ROFFSET_STATUS:
+.word 0x4
+
+REG_OFFSET_MATA_MEM_ADDR:
+.word 0x10
+
+REG_OFFSET_MATB_MEM_ADDR:
+.word 0x14
+
+REG_OFFSET_MATC_MEM_ADDR:
+.word 0x1c
+
+
+## inst start
+.text
+la s0,A
+la s1,B
+la s2,C
+
+li s3,3
+li s4,2
+li s5,3
+
+## t0 for addrA which accelerator can access in SRAM
+la t6,ACCEL_BUF_BASE_ADDR
+lw t0,0(t6) 
+
+## t1 for addrB which accelerator can access in SRAM
+mul t3,s3,s4 		
+add t1,t0,t3 
+
+## t2 for addrC which accelerator can access in SRAM
+mul t3,s4,s5 				
+add t2,t1,t3				
+
+## copy Matrix A to addrA 
+mul t3,s3,s4                   
+li t4,0                       
+loop_A:
+add t5,s0,t4                    
+lb  t6,0(t5)
+add t5,t0,t4
+sb  t6,0(t5)
+addi t4,t4,1
+blt t4,t3,loop_A
+
+## copy Matrix B to addrB 
+mul t3,s4,s5              
+li t4,0                      
+loop_B:
+add t5,s1,t4                    
+lb  t6,0(t5)
+add t5,t1,t4
+sb  t6,0(t5)
+addi t4,t4,1
+blt t4,t3,loop_B
+
+## After doing this, we move the original data in SRAM which "accelerator cannot access" 
+## to the memory space "accelerator can access".
+## And the next thing we need to do is to write the information into ACCEL_REG to make sure
+## that accelerator can work with correct spec.
+
+## t3 for REG_BASE_ADDR
+la t6,ACCEL_REG_BASE_ADDR
+lw t3,0(t6)
+
+la t6,REG_OFFSET_MATA_MEM_ADDR 
+lw t4,0(t6)
+add t4,t3,t4
+sw t0,0(t4)                         
+
+
+la t6,REG_OFFSET_MATB_MEM_ADDR 
+lw t4,0(t6)
+add t4,t3,t4
+sw t1,0(t4)                         
+
+la t6,REG_OFFSET_MATC_MEM_ADDR 
+lw t4,0(t6)
+add t4,t3,t4
+sw t2,0(t4)                         
+
+
+## information ready, pull up the ENABLE signal 
+la t6,REG_ROFFSET_ENABLE      
+lw t4,0(t6)
+add t4,t3,t4
+li t5,1
+sw t5,0(t4)                       
+
+## ... accelerator processing ...
+
+## CPU hanging until the accelerator pull up the DONE signal
+hang:
+la t6,REG_ROFFSET_STATUS       
+lw t4,0(t6)   
+add t4,t3,t4    
+lw t5,0(t4)                    
+li t6,1
+
+
+## set t5 to 1, cannot do this in Chisel design
+li t5,1
+##
+
+ 
+beq t5,t6,FINISH                    
+j hang
+
+
+FINISH:
+
+hcf
