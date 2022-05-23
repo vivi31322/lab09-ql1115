@@ -34,6 +34,9 @@ REG_OFFSET_MATB_MEM_ADDR:
 REG_OFFSET_MATC_MEM_ADDR:
 .word 0x1c
 
+REG_OFFSET_MAT_MEM_STRIDE:
+.word 0x20
+
 
 ## inst start
 .text
@@ -45,6 +48,11 @@ li s3,3  ## s3 -> dimM
 li s4,2  ## s4 -> dimK
 li s5,3  ## s5 -> dimN
 
+######################
+##                  ##
+##      Step 1      ##
+##                  ##
+######################
 ## t0 for addrA which accelerator can access in SRAM
 la t6,ACCEL_BUF_BASE_ADDR       ## addrA = ACCEL_BUF_BASE_ADDR + 0
 lw t0,0(t6)
@@ -79,10 +87,13 @@ sb  t6,0(t5)
 addi t4,t4,1
 blt t4,t3,loop_B
 
-## After doing this, we move the original data in SRAM which "accelerator cannot access" 
-## to the memory space "accelerator can access".
-## And the next thing we need to do is to write the information into ACCEL_REG to make sure
-## that accelerator can work with correct spec.
+######################
+##                  ##
+##      Step 2      ##
+##                  ##
+######################
+## After doing this, we move the original data in SRAM which "accelerator cannot access" to the memory space "accelerator can access".
+## And the next thing we need to do is to write the information into ACCEL_REG to make sure that accelerator can work with correct spec.
 
 ## t3 for REG_BASE_ADDR
 la t6,ACCEL_REG_BASE_ADDR
@@ -103,7 +114,11 @@ lw t4,0(t6)
 add t4,t3,t4
 sw t2,0(t4)                          ## put addrC into REGADDR_MATC_MEM_ADDR
 
-
+######################
+##                  ##
+##      Step 3      ##
+##                  ##
+######################
 ## information ready, pull up the ENABLE signal 
 la t6,REG_ROFFSET_ENABLE             ## t4 for REG_ROFFSET_ENABLE
 lw t4,0(t6)   
@@ -113,7 +128,7 @@ sw t5,0(t4)                          ## set ENABLE
 
 ## ... accelerator processing ...
 
-## CPU hanging until the accelerator pull up the DONE signal
+## CPU hanging til the accelerator pull up the DONE signal
 hang:
 la t6,REG_ROFFSET_STATUS             ## t4 for REG_ROFFSET_STATUS
 lw t4,0(t6)  
@@ -121,21 +136,31 @@ add t4,t3,t4
 lw t5,0(t4)                          ## load STATUS, check "DONE" signal 
 li t6,1
 
-## You have to delete the "li" instruction below, we pull up t5 only for emulator simulation to make sure it end successfully. 
-## In Chisel design, CPU will hang until the DONE bit of STATUS is written by accelerator, which means the matrix multiplication is finished.
-li t5,1
-## ~
+
+######################
+##                  ##
+##      Step 4      ##
+##                  ##
+######################
+## CPU waiting for STATUS.Done signal.
+## In software simulation, we will use emulator.cpp to write STATUS.Done signal automatically after detecting ENABLE signal.
+## Notice that 
 
 beq t5,t6,FINISH                     ## If (t5 == t6) means it's done!
 j hang
 
+
+######################
+##                  ##
+##      Step 5      ##
+##                  ##
+######################
 FINISH:
-la t6,REG_OFFSET_MATC_MEM_ADDR       ## t4 for REGADDR_MATC_MEM_ADDR (the register for accelerator)
-lw t4,0(t6)
-add t4,t3,t4
-lw t2,0(t4)
-lw t3,4(t4)
-lw t4,8(t4)
+la t4,ACCEL_BUF_BASE_ADDR
+lw t4,0(t4)
+vle8_v v1,0(t4)                     ## load data from ACCEL_BUF_BASE_ADDR to chekout whether the data transfer is correct
+vle8_v v2,8(t4)						## ..
+vle8_v v3,0(t3)                     ## load data from ACCEL_REG_BASE_ADDR to checkout the control signal is correct
 hcf
 
 

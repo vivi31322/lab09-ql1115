@@ -21,6 +21,11 @@
 #define ELEMENT_WIDTH 8
 #define VLMAX VECTOR_LEN/ELEMENT_WIDTH
 
+// parameter for MM register for memory
+#define REG_BASE_ADDRESS 0x100000
+#define REG_STATUS 0x4 
+#define REG_ENABLE 0x0
+
 typedef struct {
 	char* src;
 	int offset;

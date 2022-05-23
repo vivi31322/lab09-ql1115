@@ -216,7 +216,11 @@ void mem_write(uint8_t* mem, uint32_t addr, uint32_t data, instr_type op) {
 			case SH: *(uint16_t*)&(mem[addr]) = *(uint16_t*)&(data); break;
 			case SW: 
 				*(uint32_t*)&(mem[addr]) = data;
-				//printf( "Writing %x to addr %x\n", rf[i.a1.reg], rf[i.a2.reg]+i.a3.imm );
+				
+				/*Software 設定Enable reigster 的enable it 時
+                  模擬硬體會set STATUS register 裡的Done bit的動作 */
+                if (addr == REG_BASE_ADDRESS + REG_ENABLE && data == 1)
+                    mem[REG_BASE_ADDRESS + REG_STATUS] = 1;
 			break;
 
 			// instruction added
