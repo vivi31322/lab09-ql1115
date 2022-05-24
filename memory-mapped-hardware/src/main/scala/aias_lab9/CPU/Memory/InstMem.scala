@@ -1,4 +1,4 @@
-package aias_lab9.Memory
+package aias_lab9.Single_Cycle.Memory
 
 import chisel3._
 import chisel3.util._
@@ -13,12 +13,12 @@ class InstMem(bits:Int) extends Module {
   })
   val memory = Mem((1<<(bits)), UInt(8.W))
   loadMemoryFromFile(memory, "./src/main/resource/CPU/m_code.hex")
-  
+
   val rdata = Wire(UInt(32.W))
   rdata := Cat(memory((io.raddr+3.U)),
               memory((io.raddr+2.U)),
               memory((io.raddr+1.U)),
               memory((io.raddr+0.U)))
-  
+
   io.inst :=rdata
 }

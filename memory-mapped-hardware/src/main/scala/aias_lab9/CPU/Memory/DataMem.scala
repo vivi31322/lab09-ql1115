@@ -1,4 +1,4 @@
-package aias_lab9.Memory
+package aias_lab9.Single_Cycle.Memory
 
 import chisel3._
 import chisel3.util._
@@ -21,12 +21,12 @@ class DataMem(size:Int, addrWidth: Int, dataWidth: Int) extends Module {
     val Hcf   = Input(Bool())
     val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
   })
-  
+
   val DATA_OFFSET = 1<<size
-  
+
   val memory = SyncReadMem((1<<(size)), UInt(8.W))
   loadMemoryFromFile(memory, "./src/main/resource/CPU/data.hex")
-  
+
   val srdata = Wire(SInt(32.W))
   val wa = WireDefault(0.U(addrWidth.W))
   val wd = WireDefault(0.U(32.W))
@@ -51,7 +51,7 @@ class DataMem(size:Int, addrWidth: Int, dataWidth: Int) extends Module {
   val doWrite = writeDataReadyReg && io.slave.writeData.valid && writeAddrReadyReg && io.slave.writeAddr.valid
   val writeRegSelect = writeAddrReg & ~(3.U(addrWidth.W))
   // note that we write the entire word (no byte select using write strobe)
-  when (doWrite) { 
+  when (doWrite) {
     memory(writeRegSelect+0.U(16.W)) := io.slave.writeData.bits.data(7,0)
     memory(writeRegSelect+1.U(16.W)) := io.slave.writeData.bits.data(15,8)
     memory(writeRegSelect+2.U(16.W)) := io.slave.writeData.bits.data(23,16)
@@ -93,7 +93,6 @@ class DataMem(size:Int, addrWidth: Int, dataWidth: Int) extends Module {
                 memory(readRegSelect +1.U),
                 memory(readRegSelect +0.U)
                 ).asSInt
-  
 
 
 
@@ -106,7 +105,8 @@ class DataMem(size:Int, addrWidth: Int, dataWidth: Int) extends Module {
 
 
 
-                
+
+
   //software area in order to printout the mem value
   when(io.Hcf){
     printf("\n\t\tData Memory Value: (Unit:Word) \n")
