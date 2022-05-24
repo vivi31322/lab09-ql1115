@@ -25,7 +25,7 @@ class topSATest(dut: topSA) extends PeekPokeTester(dut) {
 object topSATest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new topSA
+    () => new topSA(32, 64)
   ) { c: topSA =>
     new topSATest(c)
   }

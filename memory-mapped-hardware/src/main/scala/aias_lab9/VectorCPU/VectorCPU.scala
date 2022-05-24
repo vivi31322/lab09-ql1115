@@ -11,7 +11,7 @@ import aias_lab9.VectorCPU.Datapath._
 
 import aias_lab9.VectorCPU.opcode_map._
 
-class VectorCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
+class VectorCPU(memAddrWidth: Int, memDataWidth: Int, instrBinaryFile: String) extends Module {
   val io = IO(new Bundle {
     // AXI
     val bus_master = new AXILiteMasterIF(memAddrWidth, memDataWidth)
@@ -24,7 +24,7 @@ class VectorCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
   })
 
   // Module
-  val im = Module(new InstMem(15))
+  val im = Module(new InstMem(15, instrBinaryFile))
   val ct = Module(new Controller(memAddrWidth, memDataWidth))
   val pc = Module(new PC())
   val ig = Module(new ImmGen())

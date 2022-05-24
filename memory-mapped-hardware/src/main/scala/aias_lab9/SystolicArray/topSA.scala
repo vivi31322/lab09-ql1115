@@ -5,9 +5,9 @@ import chisel3.util._
 
 import aias_lab9.AXILite._
 
-class topSA extends Module{
+class topSA(addrWidth: Int, dataWidth: Int) extends Module{
     val io = IO(new Bundle{
-        val slave = new AXILiteSlaveIF(32, 64)
+        val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
     })
 
     val sa = Module(new SA)
@@ -21,11 +21,4 @@ class topSA extends Module{
     mm.io.wdata <> sa.io.wdata
     mm.io.wen <> sa.io.wen
     mm.io.finish <> sa.io.finish
-}
-
-object topSA extends App{
-    (new chisel3.stage.ChiselStage).emitVerilog(
-        new topSA,
-        Array("-td","./generated/topSA")
-    )
 }

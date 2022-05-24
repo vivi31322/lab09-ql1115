@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFile
 import firrtl.annotations.MemoryLoadFileType
 
-class InstMem(bits: Int) extends Module {
+class InstMem(bits: Int, binaryFile: String) extends Module {
   val io = IO(new Bundle {
     // 32kB -> bits = 15
     val raddr = Input(UInt(bits.W))
@@ -13,7 +13,7 @@ class InstMem(bits: Int) extends Module {
   })
 
   val memory = Mem((1 << bits), UInt(8.W))
-  loadMemoryFromFile(memory, "./src/main/resource/VectorCPU/m_code.hex")
+  loadMemoryFromFile(memory, binaryFile)
 
   val rdata = Wire(UInt(32.W))
   rdata := Cat(

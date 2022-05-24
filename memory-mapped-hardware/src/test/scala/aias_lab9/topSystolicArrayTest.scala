@@ -1,4 +1,4 @@
-package aias_lab9.topVectorCPU
+package aias_lab9.topSystolicArray
 
 import scala.io.Source
 import chisel3.iotesters.{PeekPokeTester, Driver}
@@ -8,7 +8,7 @@ class topTest(dut: top) extends PeekPokeTester(dut) {
 
   implicit def bigint2boolean(b: BigInt): Boolean = if (b > 0) true else false
 
-  val filename = "./src/main/resource/VectorCPU/inst.asm"
+  val filename = ""
   val lines = Source.fromFile(filename).getLines.toList
 
   while (!peek(dut.io.Hcf)) {

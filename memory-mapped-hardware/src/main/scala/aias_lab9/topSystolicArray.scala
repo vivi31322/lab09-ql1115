@@ -1,19 +1,20 @@
-package aias_lab9.topVectorCPU
+package aias_lab9.topSystolicArray
 
 import chisel3._
 import chisel3.util._
 
 import aias_lab9.VectorCPU._
 import aias_lab9.Memory._
+import aias_lab9.SystolicArray._
 import aias_lab9.AXILite._
 
 object config {
   val addr_width = 32
   val data_width = 64
-  val addr_map = List(("h8000".U, "h10000".U))
-  val instr_hex_path = "src/main/resource/VectorCPU/m_code.hex"
+  val addr_map = List(("h8000".U, "h10000".U), ("h100000".U, "h2FFFFF".U))
+  val instr_hex_path = ""
   val data_mem_size = 16 // power of 2 in byte
-  val data_hex_path = "src/main/resource/VectorCPU/data.hex"
+  val data_hex_path = ""
 }
 
 import config._
@@ -30,11 +31,13 @@ class top extends Module {
 
   val cpu = Module(new VectorCPU(addr_width, data_width, instr_hex_path))
   val dm = Module(new DataMem(data_mem_size, addr_width, data_width, data_hex_path))
+  val sa = Module(new topSA(addr_width, data_width))
   val bus = Module(new AXILiteXBar(1, addr_map.length, addr_width, data_width, addr_map))
 
   // AXI Lite Bus
   bus.io.masters(0) <> cpu.io.bus_master
   bus.io.slaves(0) <> dm.io.bus_slave
+  bus.io.slaves(1) <> sa.io.slave
 
   // System
   io.pc := cpu.io.pc
@@ -51,6 +54,6 @@ class top extends Module {
 object top extends App {
   (new chisel3.stage.ChiselStage).emitVerilog(
     new top(),
-    Array("-td", "generated/topVectorCPU")
+    Array("-td", "generated/topSystolicArray")
   )
 }
