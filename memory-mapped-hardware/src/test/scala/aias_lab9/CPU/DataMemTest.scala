@@ -1,4 +1,4 @@
-package aias_lab9.Memory
+package aias_lab9.Single_Cycle.Memory
 
 import chisel3._
 import chisel3.util._
@@ -11,7 +11,7 @@ class DataMemTest(dut:DataMem) extends PeekPokeTester(dut){
     //WriteData
     poke(dut.io.slave.writeData.valid,true.B)
     poke(dut.io.slave.writeData.bits.data,8787)
-    
+
     //WriteAddr
     poke(dut.io.slave.writeAddr.valid,true.B)
     poke(dut.io.slave.writeAddr.bits.addr,8)
@@ -27,8 +27,6 @@ class DataMemTest(dut:DataMem) extends PeekPokeTester(dut){
 
     // //ReadData
     // poke(dut.io.slave.readData.ready,true.B)
-     
-    
 }
 
 object DataMemTest extends App{
