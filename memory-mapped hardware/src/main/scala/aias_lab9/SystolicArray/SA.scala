@@ -2,169 +2,159 @@ package aias_lab9.SystolicArray
 
 import chisel3._
 import chisel3.util._
-import chisel3.util.experimental.loadMemoryFromFile
 
-// import scala.io.Source
+import scala.io.Source
 
-import aias_lab9.SystolicArray.localMem._
+import aias_lab9.AXI._
 
 class SA(val rows:Int = 4,
            val cols:Int = 4,
-           val bits:Int = 8) extends Module{
+           val bits:Int = 8,
+           val addrWidth:Int = 32,
+           val dataWidth:Int = 32) extends Module{
     val io = IO(new Bundle{
-
-        val a_rdata = Output(UInt(32.W))
-        val b_rdata = Output(UInt(32.W))
-        val c_rdata = Output(UInt(32.W))
-        val check = Output(Bool())
-        val output = Output(Vec(4,Valid(UInt((2*bits).W))))
-
+        // for the connection to mmio
         val mmio = Flipped(new MMIO)
+
+        // for access localmem when SA still be a slave
+        val raddr = Output(UInt(32.W))
+        val rdata = Input(UInt(32.W))
+        
+        val wen   = Output(Bool())
+        val waddr = Output(UInt(32.W))
+        val wdata = Output(UInt(32.W))
+
+        // for making localMem print the value
+        val finish = Output(Bool())
     })
 
     // Module Declaration
-    val lm = Module(new LocalMem)
-    val a_b = Module(new buffer)
+    val i_buffer = Module(new buffer)
+    val o_buffer = Module(new buffer)
     val tile = Module(new tile)
 
     //counter declaration
-    val cnt = RegInit(0.U(4.W))    //used for random start
     val w_cnt = RegInit(0.U(4.W))  //used for "weight" data access 
     val i_cnt = RegInit(0.U(4.W))  //used for "input" data access 
     val o_cnt = RegInit(0.U(4.W))  //used for "input" data access 
 
+    // Enable Register
+    val ENABLE_REG = RegInit(false.B)
+
     // Read Memory Wiring
-    
-    val a_base_addr = WireDefault((0*rows*cols).U(32.W))
-    val b_base_addr = WireDefault((1*rows*cols).U(32.W))
-    val c_base_addr = WireDefault((2*rows*cols).U(32.W))
-    
-    val a_rdata = WireDefault(0.U(32.W))
-    val b_rdata = WireDefault(0.U(32.W))
-    val c_rdata = WireDefault(0.U(32.W))
-
-    lm.io.raddr(0) := a_base_addr + (i_cnt << 2)
-    lm.io.raddr(1) := b_base_addr + (w_cnt << 2)
-    lm.io.raddr(2) := c_base_addr + (o_cnt << 2)
-
-    a_rdata := lm.io.rdata(0)    
-    b_rdata := lm.io.rdata(1)
-    c_rdata := lm.io.rdata(2)
-    
-
-    // Write Memory Wiring
-    val c_waddr_bits = RegInit(VecInit(Seq.fill(cols)(0.U(log2Ceil(rows*cols).W))))
-
-    // *cols === *4 === <<2
-    lm.io.waddr(0).bits := (c_waddr_bits(0) << 2) + 0.U + c_base_addr
-    lm.io.waddr(1).bits := (c_waddr_bits(1) << 2) + 1.U + c_base_addr 
-    lm.io.waddr(2).bits := (c_waddr_bits(2) << 2) + 2.U + c_base_addr 
-    lm.io.waddr(3).bits := (c_waddr_bits(3) << 2) + 3.U + c_base_addr 
-
-    when(io.output(0).valid){c_waddr_bits(0) := c_waddr_bits(0) + 1.U}
-    when(io.output(1).valid){c_waddr_bits(1) := c_waddr_bits(1) + 1.U}
-    when(io.output(2).valid){c_waddr_bits(2) := c_waddr_bits(2) + 1.U}
-    when(io.output(3).valid){c_waddr_bits(3) := c_waddr_bits(3) + 1.U}
-
-    lm.io.waddr(0).valid := io.output(0).valid
-    lm.io.waddr(1).valid := io.output(1).valid
-    lm.io.waddr(2).valid := io.output(2).valid
-    lm.io.waddr(3).valid := io.output(3).valid
-
-    lm.io.wdata(0) <> tile.io.output(0)
-    lm.io.wdata(1) <> tile.io.output(1)
-    lm.io.wdata(2) <> tile.io.output(2)
-    lm.io.wdata(3) <> tile.io.output(3)
-
-    lm.io.finish := io.mmio.ENABLE
-
-    //ENABLE register
-    val ENABLE = RegNext(io.mmio.ENABLE)
+    val mat_buf = 0x0 // 0 because the localMem is still local for SA 
+    val a_base_addr = WireDefault(mat_buf.U + (0*rows*cols).U(32.W))
+    val b_base_addr = WireDefault(mat_buf.U + (1*rows*cols).U(32.W))
+    val c_base_addr = WireDefault(mat_buf.U + (2*rows*cols).U(32.W))
 
     //state declaration
     val sIdle :: sReady  :: sPreload :: sPropagate :: sCheck :: sFinish :: Nil = Enum(6)
     val state = RegInit(sIdle)
 
-    // prl : preload 
-    val prl = WireDefault(false.B)
-    prl := state === sPreload
+    when(state===sPreload){
+        io.raddr := b_base_addr + (w_cnt << 2)
+    }.elsewhen(state===sPropagate){
+        io.raddr := a_base_addr + (i_cnt << 2)
+    }.elsewhen(state===sCheck){
+        io.raddr := c_base_addr + (o_cnt << 2)
+    }.otherwise{
+        io.raddr := 0.U
+    }
+    
+    // Write Memory Wiring
+    val c_waddr = RegInit(0.U(32.W))
 
-    // ready signal from tile
-    val ready = WireDefault(false.B)
-    ready := state === sReady
+    io.waddr := (c_waddr<<2) + c_base_addr
+    io.wdata := o_buffer.io.output.asUInt
+    io.wen := o_buffer.io.output(0).valid
 
-    // check signal for checking the correctness of the data in c_mem
-    io.check := state === sCheck
+    // tile 2 Output Buffer wiring
+    List.range(0,cols).map{x=>
+        o_buffer.io.input(cols-1-x) <> tile.io.output(x)
+    }
 
-    //tile wiring
-    tile.io.input <> a_b.io.output
+    io.finish := io.mmio.STATUS_OUT
 
-    tile.io.weight(0).bits := lm.io.rdata(1)(31,24)
-    tile.io.weight(1).bits := lm.io.rdata(1)(23,16)
-    tile.io.weight(2).bits := lm.io.rdata(1)(15,8)
-    tile.io.weight(3).bits := lm.io.rdata(1)(7,0)
 
-    tile.io.weight(0).valid := Mux(state===sPreload,true.B,false.B)
-    tile.io.weight(1).valid := Mux(state===sPreload,true.B,false.B)
-    tile.io.weight(2).valid := Mux(state===sPreload,true.B,false.B)
-    tile.io.weight(3).valid := Mux(state===sPreload,true.B,false.B)
+    //input buffer 2 tile wiring
+    tile.io.input <> i_buffer.io.output
 
-    io.output <> tile.io.output
-    tile.io.preload := prl
+    //In our design, the preload of weight doesn't pass through the buffer
+    List.range(0,cols).map{x=>
 
-    //buffer wiring
-    a_b.io.input(0).bits := Mux(state === sPropagate && i_cnt < cols.U , a_rdata(7,0), 0.U )
-    a_b.io.input(1).bits := Mux(state === sPropagate && i_cnt < cols.U , a_rdata(15,8), 0.U )
-    a_b.io.input(2).bits := Mux(state === sPropagate && i_cnt < cols.U , a_rdata(23,16), 0.U )
-    a_b.io.input(3).bits := Mux(state === sPropagate && i_cnt < cols.U , a_rdata(31,24), 0.U )
+        tile.io.weight(x).bits := Mux(state===sPreload,io.rdata((cols-x)*bits-1,(cols-x-1)*bits),0.U)
 
-    a_b.io.input(0).valid := Mux(state === sPropagate && i_cnt < cols.U, true.B, false.B)
-    a_b.io.input(1).valid := Mux(state === sPropagate && i_cnt < cols.U, true.B, false.B)
-    a_b.io.input(2).valid := Mux(state === sPropagate && i_cnt < cols.U, true.B, false.B)
-    a_b.io.input(3).valid := Mux(state === sPropagate && i_cnt < cols.U, true.B, false.B)
+        tile.io.weight(x).valid := state===sPreload
+    }
 
+    tile.io.preload := state === sPreload
+
+    //mem to input buffer wiring
+    List.range(0,rows).map{x=>
+        
+        i_buffer.io.input(x).bits := Mux(
+            state === sPropagate && i_cnt < cols.U , 
+            io.rdata(bits*(x+1)-1,bits*x),
+            0.U 
+        )
+        
+        i_buffer.io.input(x).valid := Mux(
+            state === sPropagate && i_cnt < cols.U,
+            true.B, 
+            false.B
+        )
+    }
 
 
     when(state===sIdle){
-        val rnd_start = 3.U
-        cnt := cnt + 1.U
-        state := Mux(cnt === rnd_start,sReady,sIdle)
+        state := sReady
     }
-    when(state===sReady){
-        state := Mux(io.mmio.ENABLE,sPreload,sReady)
+    .elsewhen(state===sReady){
+        state := Mux(io.mmio.ENABLE_OUT,sPreload,sReady)
+        ENABLE_REG := io.mmio.ENABLE_OUT
     }
-    when(state===sPreload){
-        when(w_cnt === (rows-1).U){
-            state := sPropagate
+    .elsewhen(state===sPreload){
+        when(io.mmio.ENABLE_OUT){
+            state := Mux(w_cnt === (rows-1).U, sPropagate, sPreload)
+            w_cnt := Mux(w_cnt === (rows-1).U, 0.U, w_cnt + 1.U)
+        }.otherwise{
+            state := sReady
+            w_cnt := 0.U
         }
-        w_cnt := Mux(w_cnt === (rows-1).U, 0.U, w_cnt + 1.U)
     }
-    when(state===sPropagate){
-        when(!tile.io.output(cols-2).valid && tile.io.output(cols-1).valid){
-            state := sCheck
+    .elsewhen(state===sPropagate){
+        when(io.mmio.ENABLE_OUT){
+            state := Mux(i_cnt===(cols+rows-2).U, sCheck, sPropagate)
+            i_cnt := i_cnt + Mux(i_cnt===(cols+rows-2).U, 0.U, 1.U)
+        }.otherwise{
+            state := sReady
+            i_cnt := 0.U
         }
-        i_cnt := Mux(i_cnt===cols.U, i_cnt, i_cnt+1.U)
     }
-    when(state===sCheck){
+    .elsewhen(state===sCheck){
+        state := Mux(o_cnt===(rows-1).U,sFinish,sCheck)
         o_cnt := Mux(o_cnt===(rows-1).U , 0.U, o_cnt + 1.U)
-        when(o_cnt===(rows-1).U){
-            state := sFinish
-        }
+    }
+    .elsewhen(state===sFinish){
+        state := sIdle
+        ENABLE_REG := false.B
     }
 
-    io.mmio.STATUS := Mux(state===sFinish,true.B,false.B)
 
-
-    //--------------------------------------------------------------------
-    io.a_rdata := a_rdata
-    io.b_rdata := b_rdata
-    io.c_rdata := c_rdata
+    io.mmio.STATUS_IN := state===sFinish
+    io.mmio.ENABLE_IN := ENABLE_REG
+    // state := Mux(!io.mmio.ENABLE,sReady,sPreload)
+    
+    
+    
+//     //--------------------------------------------------------------------
+//     io.c_rdata := c_rdata
 
 }
 
 object SA extends App{
     (new chisel3.stage.ChiselStage).emitVerilog(
-        new SA(),
-        args
+        new SA,
+        Array("-td","./generated/SA")
     )
 }

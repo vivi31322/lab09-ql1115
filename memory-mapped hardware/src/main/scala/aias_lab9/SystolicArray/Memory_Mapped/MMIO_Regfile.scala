@@ -3,11 +3,11 @@ package aias_lab9.SystolicArray
 import chisel3._
 import chisel3.util._
 
-import aias_lab9.AXILiteDefs._
+import aias_lab9.AXI._
 
 class MMIO extends Bundle{
-    val ENABLE              = Output(Bool())
-    val STATUS              = Input(Bool())
+    val ENABLE_OUT          = Output(Bool())
+    val STATUS_OUT          = Output(Bool())
     val MATA_SIZE           = Output(UInt(32.W))
     val MATB_SIZE           = Output(UInt(32.W))
     val MATC_SIZE           = Output(UInt(32.W))
@@ -16,17 +16,22 @@ class MMIO extends Bundle{
     val MATC_MEM_ADDR       = Output(UInt(32.W))
     val MAT_MEM_STRIDE      = Output(UInt(32.W))
     val MAT_GOLDEN_MEM_ADDR = Output(UInt(32.W))
+
+    val ENABLE_IN           = Input(Bool())
+    val STATUS_IN           = Input(Bool())
 }
 
 class MMIO_Regfile extends Module{
     val io = IO(new Bundle{
-        //for SystolicArray
+        // for SystolicArray MMIO
         val mmio = new MMIO
 
+        // for Memory Mapped to r/w reg value
         val raddr = Input(UInt(32.W))
         val rdata = Output(UInt(32.W))
+
+        val wen   = Input(Bool())
         val waddr = Input(UInt(32.W))
-        val wen = Input(Bool())
         val wdata = Input(UInt(32.W))
     })
 
@@ -45,25 +50,26 @@ class MMIO_Regfile extends Module{
 
     val RegFile = RegInit(VecInit(initial_table))
 
-    io.mmio.ENABLE              := RegFile(0)            
-    io.mmio.MATA_SIZE           := RegFile(2)
-    io.mmio.MATB_SIZE           := RegFile(3)
-    io.mmio.MATC_SIZE           := RegFile(4)
-    io.mmio.MATA_MEM_ADDR       := RegFile(5)
-    io.mmio.MATB_MEM_ADDR       := RegFile(6)
-    io.mmio.MATC_MEM_ADDR       := RegFile(7)
-    io.mmio.MAT_MEM_STRIDE      := RegFile(8)
-    io.mmio.MAT_GOLDEN_MEM_ADDR := RegFile(9)
+    // MMIO circuit declaration
+        //Output
+        io.mmio.ENABLE_OUT          := RegFile(0)
+        io.mmio.STATUS_OUT          := RegFile(1)     
+        io.mmio.MATA_SIZE           := RegFile(2)
+        io.mmio.MATB_SIZE           := RegFile(3)
+        io.mmio.MATC_SIZE           := RegFile(4)
+        io.mmio.MATA_MEM_ADDR       := RegFile(5)
+        io.mmio.MATB_MEM_ADDR       := RegFile(6)
+        io.mmio.MATC_MEM_ADDR       := RegFile(7)
+        io.mmio.MAT_MEM_STRIDE      := RegFile(8)
+        io.mmio.MAT_GOLDEN_MEM_ADDR := RegFile(9)
 
-    RegFile(1)                  := io.mmio.STATUS.asUInt
-
-
-    io.rdata := RegFile(io.raddr)
-    when(io.wen){
-        RegFile(io.waddr) :=  io.wdata
-    }
+        //Input
+        RegFile(1) := io.mmio.STATUS_IN.asUInt
+        RegFile(0) := io.mmio.ENABLE_IN.asUInt
     
-
+    // r/w function declaration
+        io.rdata := RegFile(io.raddr)
+        when(io.wen){RegFile(io.waddr) := io.wdata}
 }
 
 object MMIO_Regfile extends App{
