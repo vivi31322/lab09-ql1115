@@ -5,11 +5,20 @@ import chisel3.iotesters.{PeekPokeTester, Driver}
 import scala.language.implicitConversions
 
 class topSATest(dut: topSA) extends PeekPokeTester(dut) {
-    poke(dut.io.slave.readAddr.bits.addr,0x100000)
-    poke(dut.io.slave.readAddr.valid,true)
-    poke(dut.io.slave.readData.ready,true)
+    poke(dut.io.slave.writeAddr.bits.addr,0x0)
+    poke(dut.io.slave.writeAddr.valid,true)
+    poke(dut.io.slave.writeData.bits.data,0x1)
+    poke(dut.io.slave.writeData.valid,true)
+    poke(dut.io.slave.writeResp.ready,true)
+    step(2)
+    poke(dut.io.slave.writeAddr.bits.addr,0x0)
+    poke(dut.io.slave.writeAddr.valid,false)
+    poke(dut.io.slave.writeData.bits.data,0x0)
+    poke(dut.io.slave.writeData.valid,false)
+    step(1)
+    poke(dut.io.slave.writeResp.ready,false)
 
-    step(10)
+    step(22)
 
 }
 
