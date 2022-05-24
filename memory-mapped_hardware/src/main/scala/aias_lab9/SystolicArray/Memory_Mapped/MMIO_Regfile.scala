@@ -53,16 +53,16 @@ class MMIO_Regfile extends Module{
 
     // MMIO circuit declaration
         //Output
-        io.mmio.ENABLE_OUT          := RegFile(0)
-        io.mmio.STATUS_OUT          := RegFile(1)     
-        io.mmio.MATA_SIZE           := RegFile(2)
-        io.mmio.MATB_SIZE           := RegFile(3)
-        io.mmio.MATC_SIZE           := RegFile(4)
-        io.mmio.MATA_MEM_ADDR       := RegFile(5)
-        io.mmio.MATB_MEM_ADDR       := RegFile(6)
-        io.mmio.MATC_MEM_ADDR       := RegFile(7)
-        io.mmio.MAT_MEM_STRIDE      := RegFile(8)
-        io.mmio.MAT_GOLDEN_MEM_ADDR := RegFile(9)
+        io.mmio.ENABLE_OUT          := RegNext(RegFile(0))
+        io.mmio.STATUS_OUT          := RegNext(RegFile(1))     
+        io.mmio.MATA_SIZE           := RegNext(RegFile(2))
+        io.mmio.MATB_SIZE           := RegNext(RegFile(3))
+        io.mmio.MATC_SIZE           := RegNext(RegFile(4))
+        io.mmio.MATA_MEM_ADDR       := RegNext(RegFile(5))
+        io.mmio.MATB_MEM_ADDR       := RegNext(RegFile(6))
+        io.mmio.MATC_MEM_ADDR       := RegNext(RegFile(7))
+        io.mmio.MAT_MEM_STRIDE      := RegNext(RegFile(8))
+        io.mmio.MAT_GOLDEN_MEM_ADDR := RegNext(RegFile(9))
 
     //Input
     when(io.mmio.WEN){

@@ -66,20 +66,35 @@ class Memory_Mapped(val addrWidth:Int=32,
     //r/w port default value
         io.rdata := 0.U
 
+    // the Regs used for CPU dominated
+    val RAReg = RegInit(0.U(32.W))
+    val RAReadyReg = RegInit(false.B)
+    
+    val RDReg = RegInit(0.U(32.W))
+    val RRReg = RegInit(false.B)
+    val RDValidReg = RegInit(false.B)
+
+    val canDoRead = WireDefault(io.slave.readAddr.valid && !RAReadyReg)
+    val DoRead = WireDefault(io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg)
+
+    val WAReg = RegInit(0.U(32.W))
+    val WAReadyReg = RegInit(false.B)
+
+    val WDReg = RegInit(0.U(32.W))
+    val WDReadyReg = RegInit(false.B)
+
+    val WRValidReg = RegInit(false.B)
+
+    val canDoWrite = WireDefault((io.slave.writeAddr.valid && !WAReadyReg) &&      
+                                    (io.slave.writeData.valid && !WDReadyReg))
+
+    val DoWrite = WireDefault((io.slave.writeAddr.valid && io.slave.writeAddr.ready) &&
+                                (io.slave.writeData.valid && io.slave.writeData.ready))
+
+
     // CPU dominated
     when(!io.mmio.ENABLE_OUT){
         // read behavior
-        val RAReg = RegInit(0.U(32.W))
-        val RAReadyReg = RegInit(false.B)
-        
-        val RDReg = RegInit(0.U(32.W))
-        val RRReg = RegInit(false.B)
-        val RDValidReg = RegInit(false.B)
-
-        val canDoRead = io.slave.readAddr.valid && !RAReadyReg
-        val DoRead = io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg
-
-        
         RAReadyReg := canDoRead
         io.slave.readAddr.ready := RAReadyReg
         when(canDoRead){RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))}
@@ -102,21 +117,8 @@ class Memory_Mapped(val addrWidth:Int=32,
         }
         io.slave.readData.bits.data := RDReg
 
+        
         //write behavior
-        val WAReg = RegInit(0.U(32.W))
-        val WAReadyReg = RegInit(false.B)
-
-        val WDReg = RegInit(0.U(32.W))
-        val WDReadyReg = RegInit(false.B)
-
-        val WRValidReg = RegInit(false.B)
-
-        val canDoWrite = (io.slave.writeAddr.valid && !WAReadyReg) &&      
-                         (io.slave.writeData.valid && !WDReadyReg)
-
-        val DoWrite = (io.slave.writeAddr.valid && io.slave.writeAddr.ready) &&
-                     (io.slave.writeData.valid && io.slave.writeData.ready)
-
         WAReadyReg := canDoWrite
         WDReadyReg := canDoWrite
 
@@ -139,19 +141,37 @@ class Memory_Mapped(val addrWidth:Int=32,
         }
 
         WRValidReg := DoWrite
-        io.slave.writeResp.valid  := WRValidReg
-        
-
+        io.slave.writeResp.valid := WRValidReg
     }
     // SA dominated
     .otherwise{
+
+        //reset the unused Regs
+        RAReg := 0.U
+        RAReadyReg := false.B
+        RDReg := 0.U
+        RRReg := false.B
+        RDValidReg := false.B
+        WAReg := 0.U
+        WAReadyReg := false.B
+        WDReg := 0.U
+        WDReadyReg := false.B
+        WRValidReg := false.B
+
+
         // read value from localMem
         lm.io.raddr := io.raddr
         io.rdata := lm.io.rdata
 
+        // write value to localMem
         lm.io.waddr := io.waddr
         lm.io.wdata := io.wdata
         lm.io.wen := io.wen
+
+        // write status and enable to Regfile
+        rf.io.mmio.WEN := io.mmio.WEN
+        rf.io.mmio.ENABLE_IN := io.mmio.ENABLE_IN
+        rf.io.mmio.STATUS_IN := io.mmio.STATUS_IN
     }
 }
 
