@@ -3,13 +3,14 @@ package aias_lab9.SystolicArray
 import chisel3._
 import chisel3.util._
 
-import aias_lab9.AXI._
+import aias_lab9.AXILite._
+import aias_lab9.AXILite.AXILITE_PARAMS._
 
 class Memory_Mapped(val addrWidth:Int=32,
                     val dataWidth:Int=32) extends Module{
     val io = IO(new Bundle{
         //for CPU to access the Reg and Memory
-        val slave = new AXILiteSlaveIF
+        val slave = new AXILiteSlaveIF(ADDR_WIDTH,DATA_WIDTH)
 
         //for reg to access SA
         val mmio = new MMIO

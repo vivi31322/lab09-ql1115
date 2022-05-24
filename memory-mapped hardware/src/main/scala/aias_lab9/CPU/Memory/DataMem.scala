@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFile
 
-import aias_lab9.AXILiteDefs.AXILiteSlaveIF
+import aias_lab9.AXILite.AXILiteSlaveIF
 
 object wide {
   val Byte = 0.U

@@ -3,6 +3,11 @@ package aias_lab9.AXILite
 import chisel3._
 import chisel3.util._
 
+object AXILITE_PARAMS{
+  val DATA_WIDTH = 64
+  val ADDR_WIDTH = 32
+}
+
 // the required signals on an AXI4-Lite interface
 // 0. Global
         // ACLK
@@ -32,6 +37,8 @@ import chisel3.util._
         // RDATA
         // RRESP
 
+import AXILITE_PARAMS._
+
 class AXILiteAddress(val addrWidth : Int) extends Bundle{
     val addr = UInt(addrWidth.W)
     // val prot = UInt(3.W)
@@ -40,13 +47,13 @@ class AXILiteAddress(val addrWidth : Int) extends Bundle{
 
 class AXILiteWriteData(val dataWidth: Int) extends Bundle {
     val data    = UInt(dataWidth.W)   
-    // val strb    = UInt((dataWidth/8).W) // byte masked
+    val strb    = UInt((dataWidth/8).W) // byte masked
     override def clone = { new AXILiteWriteData(dataWidth).asInstanceOf[this.type] }
 }
 
 class AXILiteReadData(val dataWidth: Int) extends Bundle {
     val data    = UInt(dataWidth.W) 
-    // val resp    = UInt(2.W)
+    val resp    = UInt(2.W)
     override def clone = { new AXILiteReadData(dataWidth).asInstanceOf[this.type] }
 }
 

@@ -2,15 +2,16 @@ package aias_lab9.AXILite
 
 import chisel3._
 import chisel3.util._
-import aias_lab9.AXI.ADDR_MAP._
+import aias_lab9.AXILite.ADDR_MAP._
+import aias_lab9.AXILite.AXILITE_PARAMS._
 
 class readMaster extends Bundle{
-  val readAddr = Flipped(Decoupled(new AXILiteAddress(32)))
-  val readData = Decoupled(new AXILiteReadData(64))
+  val readAddr = Flipped(Decoupled(new AXILiteAddress(ADDR_WIDTH)))
+  val readData = Decoupled(new AXILiteReadData(DATA_WIDTH))
 }
 class readSlave extends Bundle{
-  val readAddr = Decoupled(new AXILiteAddress(32))
-  val readData = Flipped(Decoupled(new AXILiteReadData(64)))
+  val readAddr = Decoupled(new AXILiteAddress(ADDR_WIDTH))
+  val readData = Flipped(Decoupled(new AXILiteReadData(DATA_WIDTH)))
 }
 
 class AXIReadBus(mSlaves:Int)extends Module{
@@ -22,10 +23,10 @@ class AXIReadBus(mSlaves:Int)extends Module{
   })
   val read_port=WireDefault(0.U(1.W))
   val read_port_reg=RegInit(0.U(1.W))
-  val read_addr_reg=RegInit(0.U((32).W))
+  val read_addr_reg=RegInit(0.U((ADDR_WIDTH).W))
   val read_addr_reg_valid=RegInit(false.B)
-  val slave_read_startAddr = Wire(Vec(mSlaves,UInt(32.W)))
-  val slave_read_endAddr = Wire(Vec(mSlaves,UInt(32.W)))
+  val slave_read_startAddr = Wire(Vec(mSlaves,UInt(ADDR_WIDTH.W)))
+  val slave_read_endAddr = Wire(Vec(mSlaves,UInt(DATA_WIDTH.W)))
 
   slave_read_startAddr(0):=SRAM_START_ADDR
   slave_read_endAddr(0):=SRAM_END_ADDR

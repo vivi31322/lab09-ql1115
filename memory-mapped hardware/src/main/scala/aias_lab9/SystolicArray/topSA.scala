@@ -3,11 +3,12 @@ package aias_lab9.SystolicArray
 import chisel3._
 import chisel3.util._
 
-import aias_lab9.AXI._
+import aias_lab9.AXILite._
+import aias_lab9.AXILite.AXILITE_PARAMS._
 
 class topSA extends Module{
     val io = IO(new Bundle{
-        val slave = new AXILiteSlaveIF
+        val slave = new AXILiteSlaveIF(ADDR_WIDTH, DATA_WIDTH)
     })
 
     val sa = Module(new SA)

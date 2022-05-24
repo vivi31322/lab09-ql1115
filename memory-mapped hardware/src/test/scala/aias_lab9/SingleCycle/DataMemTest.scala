@@ -5,7 +5,7 @@ import chisel3.util._
 
 import chisel3.iotesters.{Driver,PeekPokeTester}
 
-import aias_lab9.AXILiteDefs.AXILiteSlaveIF
+import aias_lab9.AXILite.AXILiteSlaveIF
 
 class DataMemTest(dut:DataMem) extends PeekPokeTester(dut){
     //WriteData

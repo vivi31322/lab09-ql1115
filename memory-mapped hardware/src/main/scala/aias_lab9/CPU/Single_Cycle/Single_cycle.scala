@@ -6,7 +6,7 @@ import chisel3.util._
 import aias_lab9.Memory._
 import aias_lab9.Single_Cycle.Controller._
 import aias_lab9.Single_Cycle.Datapath._
-import aias_lab9.AXILiteDefs.AXILiteMasterIF
+import aias_lab9.AXILite.AXILiteMasterIF
 
 class Single_Cycle(addrWidth: Int, dataWidth: Int) extends Module {
     val io = IO(new Bundle{

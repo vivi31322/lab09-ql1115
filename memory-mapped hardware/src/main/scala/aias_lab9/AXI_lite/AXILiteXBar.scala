@@ -2,12 +2,13 @@ package aias_lab9.AXILite
 
 import chisel3._
 import chisel3.util._
+import aias_lab9.AXILite.AXILITE_PARAMS._
 
 
 class AXILiteXBar(nMasters: Int, mSlaves: Int) extends Module{
     val io = IO(new Bundle{
-        val masters = Flipped(Vec(nMasters, new AXILiteMasterIF))
-        val slaves = Flipped(Vec(mSlaves, new AXILiteSlaveIF))
+        val masters = Flipped(Vec(nMasters, new AXILiteMasterIF(ADDR_WIDTH, DATA_WIDTH)))
+        val slaves = Flipped(Vec(mSlaves, new AXILiteSlaveIF(ADDR_WIDTH, DATA_WIDTH)))
     })
 
     //read channels

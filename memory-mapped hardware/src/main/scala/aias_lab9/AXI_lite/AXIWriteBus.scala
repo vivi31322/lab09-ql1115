@@ -3,6 +3,8 @@ package aias_lab9.AXILite
 import chisel3._
 import chisel3.util._
 
+import aias_lab9.AXILite.AXILITE_PARAMS._
+
 object ADDR_MAP{
   val SRAM_START_ADDR = "h8000".U
   val SRAM_END_ADDR = "h10000".U
@@ -13,13 +15,13 @@ object ADDR_MAP{
 import ADDR_MAP._
 
 class writeMaster extends Bundle{
-    val writeAddr =Flipped(Decoupled(new AXILiteAddress(32)))
-    val writeData =Flipped(Decoupled(new AXILiteWriteData(64)))
+    val writeAddr =Flipped(Decoupled(new AXILiteAddress(ADDR_WIDTH)))
+    val writeData =Flipped(Decoupled(new AXILiteWriteData(DATA_WIDTH)))
     val writeResp = Decoupled(UInt(2.W))
 }
 class writeSlave extends Bundle{
-    val writeAddr = Decoupled(new AXILiteAddress(32))
-    val writeData = Decoupled(new AXILiteWriteData(64))
+    val writeAddr = Decoupled(new AXILiteAddress(ADDR_WIDTH))
+    val writeData = Decoupled(new AXILiteWriteData(DATA_WIDTH))
     val writeResp = Flipped(Decoupled(UInt(2.W)))
 }
 
@@ -31,13 +33,13 @@ class AXIWriteBus(mSlaves:Int)extends Module{
   })
   val write_port=WireDefault(0.U(1.W))
   val write_port_reg=RegInit(0.U(1.W))
-  val write_addr_reg=RegInit(0.U((32).W))
+  val write_addr_reg=RegInit(0.U((ADDR_WIDTH).W))
   val write_addr_reg_valid=RegInit(false.B)
-  val write_data_reg=RegInit(0.U((64).W))
+  val write_data_reg=RegInit(0.U((DATA_WIDTH).W))
   val write_data_reg_valid=RegInit(false.B)
-  val write_data_reg_strb=RegInit(0.U((64/8).W))
-  val slave_write_startAddr = Wire(Vec(mSlaves,UInt(32.W)))
-  val slave_write_endAddr = Wire(Vec(mSlaves,UInt(32.W)))
+  val write_data_reg_strb=RegInit(0.U((DATA_WIDTH/8).W))
+  val slave_write_startAddr = Wire(Vec(mSlaves,UInt(ADDR_WIDTH.W)))
+  val slave_write_endAddr = Wire(Vec(mSlaves,UInt(ADDR_WIDTH.W)))
   slave_write_startAddr(0) := SRAM_START_ADDR
   slave_write_endAddr(0) := SRAM_END_ADDR
   slave_write_startAddr(1) := ACCELERATOR_START_ADDR

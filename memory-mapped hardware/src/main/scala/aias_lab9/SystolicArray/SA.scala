@@ -5,7 +5,7 @@ import chisel3.util._
 
 import scala.io.Source
 
-import aias_lab9.AXI._
+import aias_lab9.AXILite._
 
 class SA(val rows:Int = 4,
            val cols:Int = 4,

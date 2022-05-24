@@ -3,7 +3,7 @@ package aias_lab9.SystolicArray
 import chisel3._
 import chisel3.util._
 
-import aias_lab9.AXI._
+import aias_lab9.AXILite._
 
 class MMIO extends Bundle{
     val ENABLE_OUT          = Output(Bool())
