@@ -2,88 +2,81 @@ package aias_lab9.AXILite
 
 import chisel3._
 import chisel3.util._
-import aias_lab9.AXILite.ADDR_MAP._
-import aias_lab9.AXILite.AXILITE_PARAMS._
 
-class readMaster extends Bundle{
-  val readAddr = Flipped(Decoupled(new AXILiteAddress(ADDR_WIDTH)))
-  val readData = Decoupled(new AXILiteReadData(DATA_WIDTH))
-}
-class readSlave extends Bundle{
-  val readAddr = Decoupled(new AXILiteAddress(ADDR_WIDTH))
-  val readData = Flipped(Decoupled(new AXILiteReadData(DATA_WIDTH)))
+class readMaster(val addrWidth: Int, val dataWidth: Int) extends Bundle {
+  val readAddr = Flipped(Decoupled(new AXILiteAddress(addrWidth)))
+  val readData = Decoupled(new AXILiteReadData(dataWidth))
 }
 
-class AXIReadBus(mSlaves:Int)extends Module{
-  val io = IO(new Bundle{
-    val master = new readMaster
-    val slave = Vec(mSlaves,new readSlave)
-    //val decerror =Output(UInt(2.W))
-   
+class readSlave(val addrWidth: Int, val dataWidth: Int) extends Bundle {
+  val readAddr = Decoupled(new AXILiteAddress(addrWidth))
+  val readData = Flipped(Decoupled(new AXILiteReadData(dataWidth)))
+}
+
+class AXIReadBus(val mSlaves: Int, val addrWidth: Int, val dataWidth: Int, val addrMap: List[(UInt, UInt)]) extends Module {
+  val io = IO(new Bundle {
+    val master = new readMaster(addrWidth, dataWidth)
+    val slave = Vec(mSlaves, new readSlave(addrWidth, dataWidth))
   })
-  val read_port=WireDefault(0.U(1.W))
-  val read_port_reg=RegInit(0.U(1.W))
-  val read_addr_reg=RegInit(0.U((ADDR_WIDTH).W))
-  val read_addr_reg_valid=RegInit(false.B)
-  val slave_read_startAddr = Wire(Vec(mSlaves,UInt(ADDR_WIDTH.W)))
-  val slave_read_endAddr = Wire(Vec(mSlaves,UInt(DATA_WIDTH.W)))
 
-  slave_read_startAddr(0):=SRAM_START_ADDR
-  slave_read_endAddr(0):=SRAM_END_ADDR
-  slave_read_startAddr(1) := ACCELERATOR_START_ADDR
-  slave_read_endAddr(1) := ACCELERATOR_END_ADDR
+  val read_port = WireDefault(0.U(1.W))
+  val read_port_reg = RegInit(0.U(1.W))
+  val read_addr_reg = RegInit(0.U((addrWidth).W))
+  val read_addr_reg_valid = RegInit(false.B)
+  val slave_read_startAddr = Wire(Vec(mSlaves, UInt(addrWidth.W)))
+  val slave_read_endAddr = Wire(Vec(mSlaves, UInt(dataWidth.W)))
 
-   for(i <-0 until mSlaves){
-    io.slave(i).readAddr.valid:=false.B
-    io.slave(i).readData.ready:=false.B
-    io.slave(i).readAddr.bits.addr:=0.U
-    when(slave_read_startAddr(i)<=io.master.readAddr.bits.addr&&io.master.readAddr.bits.addr<slave_read_endAddr(i)){
-      read_port:=i.U    //找出slave的port
+  for (i <- 0 until addrMap.length) {
+    slave_read_startAddr(i) := addrMap(i)._1
+    slave_read_endAddr(i) := addrMap(i)._2
+  }
+
+  for (i <- 0 until mSlaves) {
+    io.slave(i).readAddr.valid := false.B
+    io.slave(i).readData.ready := false.B
+    io.slave(i).readAddr.bits.addr := 0.U
+    when(slave_read_startAddr(i) <= io.master.readAddr.bits.addr && io.master.readAddr.bits.addr < slave_read_endAddr(i)) {
+      read_port := i.U // 找出slave的port
     }
   }
 
-  io.master.readData.valid:=false.B
-  io.master.readAddr.ready:=false.B
-  io.master.readData.bits.data:=0.U
+  io.master.readData.valid := false.B
+  io.master.readAddr.ready := false.B
+  io.master.readData.bits.data := 0.U
 
-
-  when(io.master.readAddr.valid&&read_addr_reg_valid===false.B){
-    read_port_reg:=read_port
-    read_addr_reg:=io.master.readAddr.bits.addr
-    read_addr_reg_valid:=true.B
-  }.otherwise{
-    read_addr_reg:=read_addr_reg
-    read_addr_reg_valid:=read_addr_reg_valid
+  when(io.master.readAddr.valid && read_addr_reg_valid === false.B) {
+    read_port_reg := read_port
+    read_addr_reg := io.master.readAddr.bits.addr
+    read_addr_reg_valid := true.B
+  }.otherwise {
+    read_addr_reg := read_addr_reg
+    read_addr_reg_valid := read_addr_reg_valid
   }
 
-  when(read_addr_reg_valid){
-    io.master.readAddr.ready:=false.B
-  }.otherwise{
-    io.master.readAddr.ready:=true.B
+  when(read_addr_reg_valid) {
+    io.master.readAddr.ready := false.B
+  }.otherwise {
+    io.master.readAddr.ready := true.B
   }
-  
-  when(io.slave(read_port_reg).readData.valid&&read_addr_reg_valid){
-    io.master.readData.valid:=true.B
-    io.master.readData.bits.data:=io.slave(read_port_reg).readData.bits.data
-    io.master.readData.bits.resp:=io.slave(read_port_reg).readData.bits.resp
-    when(io.master.readData.ready){
-      read_addr_reg_valid:=false.B
-      io.slave(read_port_reg).readData.ready:=true.B
-    }.otherwise{
-      io.master.readData.valid:=false.B
-      io.slave(read_port_reg).readData.ready:=false.B
+
+  when(io.slave(read_port_reg).readData.valid && read_addr_reg_valid) {
+    io.master.readData.valid := true.B
+    io.master.readData.bits.data := io.slave(read_port_reg).readData.bits.data
+    io.master.readData.bits.resp := io.slave(read_port_reg).readData.bits.resp
+    when(io.master.readData.ready) {
+      read_addr_reg_valid := false.B
+      io.slave(read_port_reg).readData.ready := true.B
+    }.otherwise {
+      io.master.readData.valid := false.B
+      io.slave(read_port_reg).readData.ready := false.B
     }
-  }.otherwise{
-    io.master.readData.valid:=false.B
-    io.master.readData.bits.data:=0.U
-    io.master.readData.bits.resp:=0.U
-    io.slave(read_port_reg).readData.ready:=false.B
-  }    
-  
-  io.slave(read_port_reg).readAddr.bits.addr:=read_addr_reg
-  io.slave(read_port_reg).readAddr.valid:=read_addr_reg_valid
-  
+  }.otherwise {
+    io.master.readData.valid := false.B
+    io.master.readData.bits.data := 0.U
+    io.master.readData.bits.resp := 0.U
+    io.slave(read_port_reg).readData.ready := false.B
+  }
 
+  io.slave(read_port_reg).readAddr.bits.addr := read_addr_reg
+  io.slave(read_port_reg).readAddr.valid := read_addr_reg_valid
 }
-
-

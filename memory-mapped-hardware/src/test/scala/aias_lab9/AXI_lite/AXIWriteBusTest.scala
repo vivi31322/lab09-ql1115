@@ -1,6 +1,8 @@
 package aias_lab9.AXILite
 
+import chisel3._
 import chisel3.iotesters.{Driver,PeekPokeTester}
+
 
 class AXIWriteBusTest(dut:AXIWriteBus) extends PeekPokeTester(dut){
 
@@ -57,7 +59,9 @@ class AXIWriteBusTest(dut:AXIWriteBus) extends PeekPokeTester(dut){
 }
 
 object AXIWriteBusTest extends App{
-    Driver.execute(args,() => new AXIWriteBus(2)){
+    val addr_map = List(("h8000".U, "h10000".U), ("h10000".U, "h20000".U))
+
+    Driver.execute(args,() => new AXIWriteBus(2, 32, 64, addr_map)){
         c => new AXIWriteBusTest(c)
     }
 }

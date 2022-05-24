@@ -28,11 +28,11 @@ class AXISlaveWriteMuxTest (dut:AXISlaveWriteMux) extends PeekPokeTester(dut){
     poke(dut.io.out.writeResp.bits,2)
     step(1)
 
-    
+
 }
 
 object AXISlaveWriteMuxTest extends App {
-  chisel3.iotesters.Driver.execute(args, () => new AXISlaveWriteMux(2)) {
+  chisel3.iotesters.Driver.execute(args, () => new AXISlaveWriteMux(2, 32, 64)) {
     c => new AXISlaveWriteMuxTest(c)
   }
 }

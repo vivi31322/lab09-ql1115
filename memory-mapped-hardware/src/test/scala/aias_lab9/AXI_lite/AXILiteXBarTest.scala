@@ -1,5 +1,6 @@
 package aias_lab9.AXILite
 
+import chisel3._
 import chisel3.iotesters.{Driver,PeekPokeTester}
 
 class AXILiteXBarTest(dut:AXILiteXBar) extends PeekPokeTester(dut){
@@ -93,8 +94,8 @@ class AXILiteXBarTest(dut:AXILiteXBar) extends PeekPokeTester(dut){
     poke(dut.io.slaves(1).readData.bits.data,2)
     poke(dut.io.slaves(1).writeResp.valid,true)
     poke(dut.io.slaves(1).writeResp.bits,0)
-    
-    
+
+
     step(4)
 
 
@@ -102,7 +103,9 @@ class AXILiteXBarTest(dut:AXILiteXBar) extends PeekPokeTester(dut){
 }
 
 object AXILiteXBarTest extends App{
-    Driver.execute(args,() => new AXILiteXBar(2,2)){
+    val addr_map = List(("h8000".U, "h10000".U), ("h10000".U, "h20000".U))
+
+    Driver.execute(args,() => new AXILiteXBar(2, 2, 32, 64, addr_map)){
         c => new AXILiteXBarTest(c)
     }
 }

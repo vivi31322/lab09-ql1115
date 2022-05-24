@@ -4,13 +4,12 @@ import chisel3._
 import chisel3.util._
 
 import aias_lab9.AXILite._
-import aias_lab9.AXILite.AXILITE_PARAMS._
 
 class Memory_Mapped(val addrWidth:Int=32,
                     val dataWidth:Int=32) extends Module{
     val io = IO(new Bundle{
         //for CPU to access the Reg and Memory
-        val slave = new AXILiteSlaveIF(ADDR_WIDTH,DATA_WIDTH)
+        val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
 
         //for reg to access SA
         val mmio = new MMIO
@@ -18,7 +17,7 @@ class Memory_Mapped(val addrWidth:Int=32,
         //for SA to read/write LocalMem when it still a slave
         val raddr = Input(UInt(32.W))
         val rdata = Output(UInt(32.W))
-        
+
         val wen   = Input(Bool())
         val waddr = Input(UInt(32.W))
         val wdata = Input(UInt(32.W))
@@ -39,16 +38,16 @@ class Memory_Mapped(val addrWidth:Int=32,
         //WriteAddr channel
         io.slave.writeAddr.ready := false.B
         //ReadData channel
-        io.slave.readData.bits.data := 0.U    
+        io.slave.readData.bits.data := 0.U
         io.slave.readData.valid := false.B
         io.slave.readData.bits.resp := false.B
         //ReadAddr channel
         io.slave.readAddr.ready := false.B
         //WriteResp channel
-        io.slave.writeResp.bits := false.B    
-        io.slave.writeResp.valid := false.B 
+        io.slave.writeResp.bits := false.B
+        io.slave.writeResp.valid := false.B
 
-    
+
     // rf default wiring
         rf.io.mmio <> io.mmio
         rf.io.raddr := 0.U
@@ -95,11 +94,25 @@ class Memory_Mapped(val addrWidth:Int=32,
     // CPU dominated
     when(!io.mmio.ENABLE_OUT){
         // read behavior
+<<<<<<< HEAD
+=======
+        val RAReg = RegInit(0.U(32.W))
+        val RAReadyReg = RegInit(false.B)
+
+        val RDReg = RegInit(0.U(32.W))
+        val RRReg = RegInit(false.B)
+        val RDValidReg = RegInit(false.B)
+
+        val canDoRead = io.slave.readAddr.valid && !RAReadyReg
+        val DoRead = io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg
+
+
+>>>>>>> 981db10dbd57f73d2442e4416f9147e295d14075
         RAReadyReg := canDoRead
         io.slave.readAddr.ready := RAReadyReg
         when(canDoRead){RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))}
-        
-        // which module is read depends on addr 
+
+        // which module is read depends on addr
         when(RAReg < mat_buf.U){
             rf.io.raddr := RAReg >> 2
         }.otherwise{
@@ -119,8 +132,27 @@ class Memory_Mapped(val addrWidth:Int=32,
 
         
         //write behavior
+<<<<<<< HEAD
         WAReadyReg := canDoWrite
         WDReadyReg := canDoWrite
+=======
+        val WAReg = RegInit(0.U(32.W))
+        val WAReadyReg = RegInit(false.B)
+
+        val WDReg = RegInit(0.U(32.W))
+        val WDReadyReg = RegInit(false.B)
+
+        val WRValidReg = RegInit(false.B)
+
+        val canDoWrite = (io.slave.writeAddr.valid && !WAReadyReg) &&
+                         (io.slave.writeData.valid && !WDReadyReg)
+
+        val DoWrite = (io.slave.writeAddr.valid && io.slave.writeAddr.ready) &&
+                     (io.slave.writeData.valid && io.slave.writeData.ready)
+
+        WAReadyReg := canDoRead
+        WDReadyReg := canDoRead
+>>>>>>> 981db10dbd57f73d2442e4416f9147e295d14075
 
         io.slave.writeAddr.ready := WAReadyReg
         io.slave.writeData.ready := WDReadyReg
@@ -140,8 +172,15 @@ class Memory_Mapped(val addrWidth:Int=32,
             lm.io.wen := Mux(io.slave.writeAddr.bits.addr < mat_buf.U,false.B,true.B)
         }
 
+<<<<<<< HEAD
         WRValidReg := DoWrite
         io.slave.writeResp.valid := WRValidReg
+=======
+        WRValidReg := DoWrite && !WRValidReg
+        io.slave.writeResp.valid  := WRValidReg
+
+
+>>>>>>> 981db10dbd57f73d2442e4416f9147e295d14075
     }
     // SA dominated
     .otherwise{

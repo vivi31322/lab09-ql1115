@@ -31,7 +31,7 @@ class AXISlaveReadMuxTest (dut:AXISlaveReadMux) extends PeekPokeTester(dut){
 }
 
 object AXISlaveReadMuxTest extends App {
-  Driver.execute(args, () => new AXISlaveReadMux(2)) {
+  Driver.execute(args, () => new AXISlaveReadMux(2, 32, 64)) {
       c => new AXISlaveReadMuxTest(c)
   }
 }
