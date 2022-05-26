@@ -167,11 +167,15 @@ int parse_vector_reg(char* tok, int line, bool strict = true) {
 	return -1;
 }
 
+// parse_imm(o2, 20, line)
+
 uint32_t parse_imm(char* tok, int bits, int line, bool strict = true) {
 	if ( !(tok[0]>='0'&&tok[0]<='9') && tok[0] != '-' && strict) {
 		print_syntax_error(line, "Malformed immediate value" );
 	}
 	long int imml = strtol(tok, NULL, 0);
+	
+	printf("tok = %s\n",tok);
 
 
 	if (imml > ((1<<bits)-1) || imml < -(1<<(bits-1)) ) {
@@ -233,6 +237,7 @@ void mem_write(uint8_t* mem, uint32_t addr, uint32_t data, instr_type op) {
 		printf( "0x%x -- 0x%x\n", addr, data);
 	}
 }
+
 uint32_t mem_read(uint8_t* mem, uint32_t addr, instr_type op) {
 	uint32_t ret = 0;;
 	int bytes = 0;
@@ -403,6 +408,9 @@ int parse_pseudoinstructions(int line, char* ftok, instr* imem, int ioff, label_
 		if ( !o1 || !o2 || o3 ) print_syntax_error(line, "Invalid format");
 
 		int reg = parse_reg(o1, line);
+
+		printf("reg = %d \n",reg);
+		printf("ioff = %d \n",ioff);
 
 		instr* i = &imem[ioff];
 		i->op = LUI;
@@ -954,8 +962,8 @@ void execute(uint8_t* mem, instr* imem, label_loc* labels, int label_count, bool
 				printf( "\n\n----------\n\n" );
 				printf( "Reached Halt and Catch Fire instruction!\n" );
 				printf( "inst: %6d pc: %6d src line: %d\n", inst_cnt, pc, i.orig_line );
-				print_regfile(rf);
-				print_vector_regfile(vrf);
+				// print_regfile(rf);
+				// print_vector_regfile(vrf);
 				printf( "\nCache read %d/%d Cache write %d/%d\n", cache_read_hits, mem_read_reqs, cache_write_hits, mem_write_reqs );
 				printf( "Cache flush words: %d\n", mem_flush_words);
 				dexit = true;

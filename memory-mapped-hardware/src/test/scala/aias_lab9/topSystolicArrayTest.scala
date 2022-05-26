@@ -8,7 +8,7 @@ class topTest(dut: top) extends PeekPokeTester(dut) {
 
   implicit def bigint2boolean(b: BigInt): Boolean = if (b > 0) true else false
 
-  val filename = ""
+  val filename = "src/main/resource/SystolicArray/inst.asm"
   val lines = Source.fromFile(filename).getLines.toList
 
   while (!peek(dut.io.Hcf)) {
@@ -95,7 +95,7 @@ class topTest(dut: top) extends PeekPokeTester(dut) {
 
 object topTest extends App {
   Driver.execute(
-    Array("-td", "./generated", "-tbn", "verilator"),
+    Array("-tbn", "verilator"),
     () => new top
   ) { c: top =>
     new topTest(c)

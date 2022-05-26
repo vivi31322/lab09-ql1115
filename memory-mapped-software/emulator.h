@@ -9,7 +9,7 @@
 #include <errno.h>
 
 // 64 KB
-#define MEM_BYTES 0xFFFFFFFF
+#define MEM_BYTES 0x10000
 #define TEXT_OFFSET 0
 #define DATA_OFFSET 8000
 

@@ -12,9 +12,9 @@ object config {
   val addr_width = 32
   val data_width = 64
   val addr_map = List(("h8000".U, "h10000".U), ("h100000".U, "h2FFFFF".U))
-  val instr_hex_path = ""
+  val instr_hex_path = "src/main/resource/SystolicArray/m_code.hex"
   val data_mem_size = 16 // power of 2 in byte
-  val data_hex_path = ""
+  val data_hex_path = "src/main/resource/SystolicArray/data.hex"
 }
 
 import config._
