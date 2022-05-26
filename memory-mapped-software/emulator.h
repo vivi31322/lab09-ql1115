@@ -1,12 +1,12 @@
+#ifndef EMULATOR_H__
+#define EMULATOR_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-
-#ifndef EMULATOR_H__
-#define EMULATOR_H__
 
 // 64 KB
 #define MEM_BYTES 0xFFFFFFFF
@@ -32,55 +32,88 @@ typedef struct {
 } source;
 
 typedef enum {
-	UNIMPL = 0,
+    UNIMPL = 0,
+    MUL,
+    CLZ,
+    MIN,
+    ROL,
+    BEXT,
+    BSETI,
+    SH3ADD,
+    XNOR,
 
-	//instruction added
-	MUL,
+    CLMULR,  //	clmulr rd, rs1, rs2
+    MAXU,    //	maxu rd, rs1, rs2
+    REV8,    //	rev8 rd, rs
+    BCLRI,   // 	bclri rd, rs1, imm
+    BSET,    //	bset rd, rs1, rs2
+    SH2ADD,  //	sh2add rd, rs1, rs2
+
+    CLMULH,  // clmulh rd, rs1, rs2
+    MAX,     // max rd, rs1, rs2
+    ORN,     // orn rd, rs1, rs2
+    BCLR,    // bclr rd, rs1, rs2
+    BINVI,   // binvi rd, rs1, imm
+    SH1ADD,  // sh1add rd, rs1, rs2
+
+    CLMUL,
+    CTZ,
+    ORC_B,
+    RORI,
+    BINV,
+    SEXT_H,
+    ADD,
+    ADDI,
+    AND,
+    ANDI,
+    AUIPC,
+    BEQ,
+    BGE,
+    BGEU,
+    BLT,
+    BLTU,
+    BNE,
+    JAL,
+    JALR,
+    LB,
+    LBU,
+    LH,
+    LHU,
+    LUI,
+    LW,
+    OR,
+    ORI,
+    SB,
+    SH,
+    SLL,
+    SLLI,
+    SLT,
+    SLTI,
+    SLTIU,
+    SLTU,
+    SRA,
+    SRAI,
+    SRL,
+    SRLI,
+    SUB,
+    SW,
+    XOR,
+    XORI,
+    HCF,
+    ANDN,
+    CPOP,
+    MINU,
+    ROR,
+    BEXTI,
+    SEXT_B,
+    ZEXT_H,
     VLE8_V,
     VSE8_V,
     VADD_VV,
     VMUL_VX,
-    //*****************
-
-	ADD,
-	ADDI,
-	AND,
-	ANDI,
-	AUIPC,
-	BEQ,
-	BGE,
-	BGEU,
-	BLT,
-	BLTU,
-	BNE,
-	JAL,
-	JALR,
-	LB,
-	LBU,
-	LH,
-	LHU,
-	LUI,
-	LW,
-	OR,
-	ORI,
-	SB,
-	SH,
-	SLL,
-	SLLI,
-	SLT,
-	SLTI,
-	SLTIU,
-	SLTU,
-	SRA,
-	SRAI,
-	SRL,
-	SRLI,
-	SUB,
-	SW,
-	XOR,
-	XORI,
-	HCF
+    VMACC_VV
 } instr_type;
+
 
 typedef enum {
 	OPTYPE_NONE, // more like "don't care"

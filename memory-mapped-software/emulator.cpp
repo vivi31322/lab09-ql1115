@@ -38,7 +38,7 @@ void print_regfile(uint32_t rf[32]) {
 
 void print_vector_regfile(uint64_t vrf[32]) {
 	for (int j= 0; j < 32; j++ ) {
-		printf( "\nVector register %d : %#018" PRIx64 "" , j, vrf[j]);
+		printf( "\nVector register %02d : %#018" PRIx64 "" , j, vrf[j]);
 	}
 }
 
@@ -1097,8 +1097,8 @@ main(int argc, char** argv) {
 	execute(mem, imem, labels, label_count, start_immediate);
 	printf( "Execution done!\n" );
 
-    //translate_to_machine_code(mem,imem,argv[1]);
-	//printf( "translation done!\n" );
+    translate_to_machine_code(mem,imem,argv[1]);
+	printf( "translation done!\n" );
 
 	// for(int i = 0; i < label_count; i++){
 	// 	printf("label %s locates in %d\n",labels[i].label,labels[i].loc);
