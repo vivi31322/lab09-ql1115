@@ -174,9 +174,6 @@ uint32_t parse_imm(char* tok, int bits, int line, bool strict = true) {
 		print_syntax_error(line, "Malformed immediate value" );
 	}
 	long int imml = strtol(tok, NULL, 0);
-	
-	printf("tok = %s\n",tok);
-
 
 	if (imml > ((1<<bits)-1) || imml < -(1<<(bits-1)) ) {
 		printf( "Syntax error at token %s\n", tok);
@@ -334,6 +331,7 @@ int parse_data_element(int line, int size, uint8_t* mem, int offset) {
 	}
 	return offset;
 }
+
 int parse_data_zero(int line, uint8_t* mem, int offset) {
 	char* t = strtok(NULL, " \t\r\n");
 	int bytes = atoi(t);
@@ -341,6 +339,7 @@ int parse_data_zero(int line, uint8_t* mem, int offset) {
 
 	return offset + bytes;
 }
+
 int parse_assembler_directive(int line, char* ftok, uint8_t* mem, int memoff) {
 	//printf( "assembler directive %s\n", ftok );
 	if ( 0 == memcmp(ftok, ".text", strlen(ftok) ) ) {
@@ -408,9 +407,6 @@ int parse_pseudoinstructions(int line, char* ftok, instr* imem, int ioff, label_
 		if ( !o1 || !o2 || o3 ) print_syntax_error(line, "Invalid format");
 
 		int reg = parse_reg(o1, line);
-
-		printf("reg = %d \n",reg);
-		printf("ioff = %d \n",ioff);
 
 		instr* i = &imem[ioff];
 		i->op = LUI;
@@ -955,7 +951,6 @@ void execute(uint8_t* mem, instr* imem, label_loc* labels, int label_count, bool
 				break;
 			case LUI:
 				rf[i.a1.reg] = (i.a2.imm<<12);
-				//printf( "lui %x \n", rf[i.a1.reg] );
 				break;
 			
 			case HCF:
@@ -1057,8 +1052,7 @@ void normalize_labels(instr* imem, label_loc* labels, int label_count, source* s
 	}
 }
 
-int
-main(int argc, char** argv) {
+int main(int argc, char** argv) {
 	if ( argc < 2 ) {
 		printf( "usage: %s asmfile\n", argv[0] );
 		exit(1);

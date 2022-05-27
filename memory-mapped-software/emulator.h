@@ -9,9 +9,9 @@
 #include <errno.h>
 
 // 64 KB
-#define MEM_BYTES 0x10000
-#define TEXT_OFFSET 0
-#define DATA_OFFSET 8000
+#define MEM_BYTES 0xffffffff
+#define TEXT_OFFSET 0x0
+#define DATA_OFFSET 0x8000
 
 #define MAX_LABEL_COUNT 128
 #define MAX_LABEL_LEN 32
@@ -121,6 +121,7 @@ typedef enum {
 	OPTYPE_IMM,
 	OPTYPE_LABEL,
 } operand_type;
+
 typedef struct {
 	operand_type type = OPTYPE_NONE;
 	char label[MAX_LABEL_LEN];
@@ -128,6 +129,7 @@ typedef struct {
 	uint32_t imm;
 
 } operand;
+
 typedef struct {
 	instr_type op;
 	operand a1;

@@ -507,10 +507,6 @@ void translate_to_machine_code(uint8_t *mem, instr *imem, char *argv1) {
                 binary = (i.a2.imm << INSTR_FORMAT::U_TYPE::imm_31_12) |
                          (i.a1.reg << INSTR_FORMAT::U_TYPE::rd) |
                          OPCODE::LUI;
-                printf("i.a2.imm = %d\n",i.a2.imm);
-                printf("i.a1.reg = %d\n",i.a1.reg);
-                printf("OPCODE::LUI = %d\n",OPCODE::LUI);
-                printf("binary = %x\n",binary);
                 break;
 
             // M standard extension

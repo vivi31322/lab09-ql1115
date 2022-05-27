@@ -11,13 +11,17 @@ class topTest(dut: top) extends PeekPokeTester(dut) {
   val filename = "src/main/resource/SystolicArray/inst.asm"
   val lines = Source.fromFile(filename).getLines.toList
 
-  while (!peek(dut.io.Hcf)) {
+  var i = 0
+
+  while(i < 200){
+  // while (!peek(dut.io.Hcf)) {
     var current_pc = peek(dut.io.pc).toInt
     println("Cycle: " + peek(dut.io.cycle_count).toString)
     println("PC: " + peek(dut.io.pc).toString)
     println("Inst: " + lines(current_pc >> 2))
     println("==============================")
 
+    i = i+1
     step(1)
   }
 

@@ -29,7 +29,8 @@ class Memory_Mapped(val addrWidth:Int=32,
     val rf = Module(new MMIO_Regfile)
     val lm = Module(new LocalMem)
 
-    val mat_buf = 0x100000
+    val ACCEL_REG_BASE_ADDR = 0x100000
+    val ACCEL_MEM_BASE_ADDR = 0x200000
 
 
     //slave port deafault value
@@ -99,17 +100,17 @@ class Memory_Mapped(val addrWidth:Int=32,
         when(canDoRead){RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))}
 
         // which module is read depends on addr
-        when(RAReg < mat_buf.U){
+        when(RAReg < ACCEL_MEM_BASE_ADDR.U){
             rf.io.raddr := RAReg >> 2
         }.otherwise{
-            lm.io.raddr := RAReg - mat_buf.U
+            lm.io.raddr := RAReg - ACCEL_MEM_BASE_ADDR.U
         }
 
         RDValidReg := DoRead
         RRReg := DoRead
         io.slave.readData.valid := RDValidReg
 
-        when(RAReg < mat_buf.U){
+        when(RAReg < ACCEL_MEM_BASE_ADDR.U){
             RDReg := Mux(DoRead,rf.io.rdata,0.U)
         }.otherwise{
             RDReg := Mux(DoRead,lm.io.rdata,0.U)
@@ -129,14 +130,14 @@ class Memory_Mapped(val addrWidth:Int=32,
             WDReg := io.slave.writeData.bits.data
         }
 
-        rf.io.waddr := WAReg >> 2
-        lm.io.waddr := WAReg - mat_buf.U
-        rf.io.wdata := WDReg
-        lm.io.wdata := WDReg
-
+        
         when(DoWrite){
-            rf.io.wen := Mux(io.slave.writeAddr.bits.addr < mat_buf.U,true.B,false.B)
-            lm.io.wen := Mux(io.slave.writeAddr.bits.addr < mat_buf.U,false.B,true.B)
+            rf.io.waddr := WAReg >> 2
+            lm.io.waddr := WAReg - ACCEL_MEM_BASE_ADDR.U
+            rf.io.wdata := WDReg
+            lm.io.wdata := WDReg
+            rf.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,true.B,false.B)
+            lm.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,false.B,true.B)
         }
 
         WRValidReg := DoWrite && !WRValidReg
