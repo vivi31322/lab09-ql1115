@@ -90,10 +90,10 @@ mul t3,s3,s4
 li t4,0                         
 loop_A:
 add t5,s0,t4                    
-lb  t6,0(t5)
+lw  t6,0(t5)
 add t5,t0,t4
-sb  t6,0(t5)
-addi t4,t4,1
+sw  t6,0(t5)
+addi t4,t4,4
 blt t4,t3,loop_A
 
 ## copy Matrix B to addrB 
@@ -103,10 +103,10 @@ mul t3,s4,s5
 li t4,0                         
 loop_B:
 add t5,s1,t4                    
-lb  t6,0(t5)
+lw  t6,0(t5)
 add t5,t1,t4
-sb  t6,0(t5)
-addi t4,t4,1
+sw  t6,0(t5)
+addi t4,t4,4
 blt t4,t3,loop_B
 
 ######################
