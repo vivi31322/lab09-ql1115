@@ -97,7 +97,7 @@ addi t4,t4,4
 blt t4,t3,loop_A
 
 ## copy Matrix B to addrB 
-## t3 for size of Matrix B = 2*3
+## t3 for size of Matrix B = 4*4
 mul t3,s4,s5  
 ## t4 for offset                  
 li t4,0                         
@@ -189,13 +189,35 @@ j hang
 ##                  ##
 ######################
 FINISH:
-la t4,ACCEL_MEM_BASE_ADDR
-lw t4,0(t4)
-## load data from ACCEL_MEM_BASE_ADDR to chekout whether the data transfer is correct
-vle8_v v1,0(t4)                     
-vle8_v v2,8(t4)						
-## load data from ACCEL_REG_BASE_ADDR to checkout the control signal is correct
-vle8_v v3,0(t3)                     
+## turn down the status reg
+sw zero,0(t4)
+
+# ## calculate the base addr of mat_A in Accelerator
+# la t4,ACCEL_MEM_BASE_ADDR
+# lw t4,0(t4)
+
+# ## calculate the base addr of mat_B in Accelerator
+# mul t3,s3,s4
+# add t4,t4,t3
+# ## calculate the base addr of mat_C in Accelerator
+# mul t3,s4,s5
+# add t4,t4,t3
+
+# ## load data from ACCEL_MEM_BASE_ADDR to chekout whether the data transfer is correct
+# vle8_v v1,0(t4)                     
+# vle8_v v2,8(t4)						
+# ## load data from ACCEL_REG_BASE_ADDR to checkout the control signal is correct
+# vle8_v v3,0(t3)
+
+
+# ## load data from ACCEL_MEM_BASE_ADDR to reg(s0~3) to chekout whether the data transfer is correct
+lw s2,0(t2)
+lw s3,4(t2)
+lw s4,8(t2)
+lw s5,12(t2)
+
+
+
 hcf
 
 

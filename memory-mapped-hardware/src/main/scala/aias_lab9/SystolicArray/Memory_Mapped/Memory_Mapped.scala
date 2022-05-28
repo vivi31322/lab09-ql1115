@@ -6,7 +6,7 @@ import chisel3.util._
 import aias_lab9.AXILite._
 
 class Memory_Mapped(val addrWidth:Int=32,
-                    val dataWidth:Int=32) extends Module{
+                    val dataWidth:Int=64) extends Module{
     val io = IO(new Bundle{
         //for CPU to access the Reg and Memory
         val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
@@ -65,7 +65,7 @@ class Memory_Mapped(val addrWidth:Int=32,
 
     //r/w port default value
         io.rdata := 0.U
-
+    
     // the Regs used for CPU dominated
     val RAReg = RegInit(0.U(32.W))
     val RAReadyReg = RegInit(false.B)
@@ -75,7 +75,8 @@ class Memory_Mapped(val addrWidth:Int=32,
     val RDValidReg = RegInit(false.B)
 
     val canDoRead = WireDefault(io.slave.readAddr.valid && !RAReadyReg)
-    val DoRead = WireDefault(io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg)
+    // seems weird because read behavior of reg and SyncReadMem through AXI are different...
+    val DoRead = RegNext(io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg)
 
     val WAReg = RegInit(0.U(32.W))
     val WAReadyReg = RegInit(false.B)
@@ -97,7 +98,7 @@ class Memory_Mapped(val addrWidth:Int=32,
         // read behavior
         RAReadyReg := canDoRead
         io.slave.readAddr.ready := RAReadyReg
-        when(canDoRead){RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))}
+        RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))
 
         // which module is read depends on addr
         when(RAReg < ACCEL_MEM_BASE_ADDR.U){
@@ -175,11 +176,4 @@ class Memory_Mapped(val addrWidth:Int=32,
         rf.io.mmio.ENABLE_IN := io.mmio.ENABLE_IN
         rf.io.mmio.STATUS_IN := io.mmio.STATUS_IN
     }
-}
-
-object Memory_Mapped extends App{
-    (new chisel3.stage.ChiselStage).emitVerilog(
-        new Memory_Mapped,
-        Array("-td","./generated/Memory_Mapped")
-    )
 }

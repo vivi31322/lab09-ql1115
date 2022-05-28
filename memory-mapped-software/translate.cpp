@@ -251,8 +251,8 @@ void translate_to_machine_code(uint8_t *mem, instr *imem, char *argv1) {
     uint32_t inst_cnt = 0;
     bool dexit = false;
 
-    char* path;
-	copy_path(argv1, &path);
+    const char* path = "../memory-mapped-hardware/src/main/resource/SystolicArray/";
+	// copy_path(argv1, &path);
 
     FILE *mch_file = fopen(concat(path, "m_code.hex"), "w");
     FILE *inst_file = fopen(concat(path, "inst.asm"), "w");

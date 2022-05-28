@@ -83,7 +83,7 @@ class SA(val rows:Int = 4,
         o_buffer.io.input(cols-1-x) <> tile.io.output(x)
     }
 
-    io.finish := io.mmio.STATUS_OUT
+    io.finish := io.mmio.STATUS_IN
 
 
     //input buffer 2 tile wiring
