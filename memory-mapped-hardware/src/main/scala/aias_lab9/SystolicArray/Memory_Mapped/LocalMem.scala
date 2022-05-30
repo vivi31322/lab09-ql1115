@@ -30,6 +30,7 @@ class LocalMem(mem_size:Int,
     
     val rdata = WireDefault(
         List.range(0,data_width>>3).map{x=>
+            //data_width>>3 === 64/8=8
             localMem(io.raddr+x.U) << (((data_width>>3)-1-x)*byte)
         }.reduce(_+_)
     )

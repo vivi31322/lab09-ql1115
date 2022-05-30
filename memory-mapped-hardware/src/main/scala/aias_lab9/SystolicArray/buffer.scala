@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.stage.ChiselStage
 
-class buffer(val size:Int=4, val bits:Int=8) extends Module{
+class buffer(size:Int, bits:Int) extends Module{
     val io = IO(new Bundle{
         val input = Input(Vec(size,Valid(UInt(bits.W))))
         val output = Output(Vec(size,Valid(UInt(bits.W))))
@@ -26,11 +26,4 @@ class buffer(val size:Int=4, val bits:Int=8) extends Module{
 
         io.output(length).valid := tap_valid.last
     }
-}
-
-object buffer extends App{
-    (new chisel3.stage.ChiselStage).emitVerilog(
-        new buffer,
-        Array("-td","generated/buffer")
-    )
 }

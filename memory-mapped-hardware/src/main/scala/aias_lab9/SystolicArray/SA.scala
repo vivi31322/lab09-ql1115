@@ -8,12 +8,13 @@ import scala.io.Source
 import aias_lab9.AXILite._
 
 class SA(rows:Int,
-           cols:Int,
-           addr_width:Int,
-           data_width:Int) extends Module{
+         cols:Int,
+         addr_width:Int,
+         data_width:Int,
+         reg_width:Int) extends Module{
     val io = IO(new Bundle{
         // for the connection to mmio
-        val mmio = Flipped(new MMIO(data_width))
+        val mmio = Flipped(new MMIO(reg_width))
 
         // for access localmem when SA still be a slave
         val raddr = Output(UInt(addr_width.W))
@@ -29,12 +30,17 @@ class SA(rows:Int,
 
     // constant declaration
     val byte = 8
+    val mat_a_rows = io.mmio.MATA_SIZE(11, 0) + 1.U
+    val mat_a_cols = io.mmio.MATA_SIZE(27,16) + 1.U
+    val mat_b_rows = io.mmio.MATB_SIZE(11, 0) + 1.U
+    val mat_b_cols = io.mmio.MATB_SIZE(27,16) + 1.U
+    val mat_c_rows = io.mmio.MATC_SIZE(11, 0) + 1.U
+    val mat_c_cols = io.mmio.MATC_SIZE(27,16) + 1.U        
 
     // Module Declaration
-    val i_buffer = Module(new buffer)
-    // val w_buffer = Module(new buffer)
-    val o_buffer = Module(new buffer)
-    val tile = Module(new tile)
+    val i_buffer = Module(new buffer(rows,byte))
+    val o_buffer = Module(new buffer(cols,byte))
+    val tile = Module(new tile(rows,cols,byte))
 
     //counter declaration
     val w_cnt = RegInit(0.U(4.W))  //used for "weight" data access 
@@ -45,10 +51,10 @@ class SA(rows:Int,
     val ENABLE_REG = RegInit(false.B)
 
     // Read Memory Wiring
-    val mat_buf = 0x0 // 0 because the localMem is still local for SA 
-    val a_base_addr = WireDefault(mat_buf.U + (0*rows*cols).U(addr_width.W))
-    val b_base_addr = WireDefault(mat_buf.U + (1*rows*cols).U(addr_width.W))
-    val c_base_addr = WireDefault(mat_buf.U + (2*rows*cols).U(addr_width.W))
+    val mat_buf = 0x000000 // 0 because the localMem is still local for SA 
+    val a_base_addr = WireDefault(io.mmio.MATA_MEM_ADDR)
+    val b_base_addr = WireDefault(io.mmio.MATB_MEM_ADDR)
+    val c_base_addr = WireDefault(io.mmio.MATC_MEM_ADDR)
 
     //state declaration
     val sIdle :: sReady  :: sStall_0 :: sPreload :: sStall_1 ::  sPropagate :: sCheck :: sFinish :: Nil = Enum(8)
@@ -172,9 +178,9 @@ class SA(rows:Int,
 
 }
 
-// object SA extends App{
-//     (new chisel3.stage.ChiselStage).emitVerilog(
-//         new SA,
-//         Array("-td","./generated/SA")
-//     )
-// }
+object SA extends App{
+    (new chisel3.stage.ChiselStage).emitVerilog(
+        new SA(4,4,32,64,32),
+        Array("-td","./generated/SA")
+    )
+}
