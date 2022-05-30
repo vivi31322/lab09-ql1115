@@ -5,13 +5,13 @@ import chisel3.util._
 
 import aias_lab9.AXILite._
 
-class topSA(addrWidth: Int, dataWidth: Int) extends Module{
+class topSA(addr_width: Int, data_width: Int) extends Module{
     val io = IO(new Bundle{
-        val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
+        val slave = new AXILiteSlaveIF(addr_width, data_width)
     })
 
-    val sa = Module(new SA)
-    val mm = Module(new Memory_Mapped)
+    val sa = Module(new SA(4,4,addr_width, data_width))
+    val mm = Module(new Memory_Mapped(0x8000,addr_width, data_width))
 
     io.slave <> mm.io.slave
     mm.io.mmio <> sa.io.mmio

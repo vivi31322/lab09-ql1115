@@ -55,7 +55,7 @@ class Memory_MappedTest(dut: Memory_Mapped) extends PeekPokeTester(dut) {
 object Memory_MappedTest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new Memory_Mapped
+    () => new Memory_Mapped(0x8000,32,64)
   ) { c: Memory_Mapped =>
     new Memory_MappedTest(c)
   }

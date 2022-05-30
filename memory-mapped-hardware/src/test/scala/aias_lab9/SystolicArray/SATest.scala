@@ -18,7 +18,7 @@ class SATest(dut: SA) extends PeekPokeTester(dut) {
 object SATest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new SA
+    () => new SA(4,4,32,64)
   ) { c: SA =>
     new SATest(c)
   }

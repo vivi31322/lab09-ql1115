@@ -7,26 +7,28 @@ import scala.io.Source
 
 import aias_lab9.AXILite._
 
-class SA(val rows:Int = 4,
-           val cols:Int = 4,
-           val bits:Int = 8,
-           val addrWidth:Int = 32,
-           val dataWidth:Int = 32) extends Module{
+class SA(rows:Int,
+           cols:Int,
+           addr_width:Int,
+           data_width:Int) extends Module{
     val io = IO(new Bundle{
         // for the connection to mmio
-        val mmio = Flipped(new MMIO)
+        val mmio = Flipped(new MMIO(data_width))
 
         // for access localmem when SA still be a slave
-        val raddr = Output(UInt(32.W))
-        val rdata = Input(UInt(32.W))
+        val raddr = Output(UInt(addr_width.W))
+        val rdata = Input(UInt(data_width.W))
         
         val wen   = Output(Bool())
-        val waddr = Output(UInt(32.W))
-        val wdata = Output(UInt(32.W))
+        val waddr = Output(UInt(addr_width.W))
+        val wdata = Output(UInt(data_width.W))
 
         // for making localMem print the value
         val finish = Output(Bool())
     })
+
+    // constant declaration
+    val byte = 8
 
     // Module Declaration
     val i_buffer = Module(new buffer)
@@ -44,9 +46,9 @@ class SA(val rows:Int = 4,
 
     // Read Memory Wiring
     val mat_buf = 0x0 // 0 because the localMem is still local for SA 
-    val a_base_addr = WireDefault(mat_buf.U + (0*rows*cols).U(32.W))
-    val b_base_addr = WireDefault(mat_buf.U + (1*rows*cols).U(32.W))
-    val c_base_addr = WireDefault(mat_buf.U + (2*rows*cols).U(32.W))
+    val a_base_addr = WireDefault(mat_buf.U + (0*rows*cols).U(addr_width.W))
+    val b_base_addr = WireDefault(mat_buf.U + (1*rows*cols).U(addr_width.W))
+    val c_base_addr = WireDefault(mat_buf.U + (2*rows*cols).U(addr_width.W))
 
     //state declaration
     val sIdle :: sReady  :: sStall_0 :: sPreload :: sStall_1 ::  sPropagate :: sCheck :: sFinish :: Nil = Enum(8)
@@ -74,8 +76,8 @@ class SA(val rows:Int = 4,
         io.raddr := 0.U
     }
 
-    io.waddr := c_base_addr + (o_cnt<<2)
-    io.wdata := List.range(0,cols).map{case x => o_buffer.io.output(x).bits <<(bits*(cols-1-x))}.reduce(_+_)
+    io.waddr := c_base_addr + (o_cnt<<3)
+    io.wdata := List.range(0,cols).map{case x => o_buffer.io.output(x).bits <<(byte*(cols-1-x))}.reduce(_+_)
     io.wen := o_buffer.io.output(0).valid
 
     // tile 2 Output Buffer wiring
@@ -92,7 +94,7 @@ class SA(val rows:Int = 4,
     //In our design, the preload of weight doesn't pass through the buffer
     List.range(0,cols).map{x=>
 
-        tile.io.weight(x).bits := Mux(state===sStall_0 || state===sPreload,io.rdata((cols-x)*bits-1,(cols-x-1)*bits),0.U)
+        tile.io.weight(x).bits := Mux(state===sStall_0 || state===sPreload,io.rdata((cols-x)*byte-1,(cols-x-1)*byte),0.U)
 
         tile.io.weight(x).valid := state===sPreload
     }
@@ -104,7 +106,7 @@ class SA(val rows:Int = 4,
         
         i_buffer.io.input(x).bits := Mux(
             state === sPropagate && i_cnt <= cols.U , 
-            io.rdata(bits*(x+1)-1,bits*x),
+            io.rdata(byte*(x+1)-1,byte*x),
             0.U 
         )
         
@@ -170,9 +172,9 @@ class SA(val rows:Int = 4,
 
 }
 
-object SA extends App{
-    (new chisel3.stage.ChiselStage).emitVerilog(
-        new SA,
-        Array("-td","./generated/SA")
-    )
-}
+// object SA extends App{
+//     (new chisel3.stage.ChiselStage).emitVerilog(
+//         new SA,
+//         Array("-td","./generated/SA")
+//     )
+// }
