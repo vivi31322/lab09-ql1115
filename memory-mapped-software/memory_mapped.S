@@ -33,10 +33,10 @@ REG_ROFFSET_STATUS:
 .word 0x4
 
 REG_OFFSET_MATA_MEM_ADDR:
-.word 0x10
+.word 0x14
 
 REG_OFFSET_MATB_MEM_ADDR:
-.word 0x14
+.word 0x18
 
 REG_OFFSET_MATC_MEM_ADDR:
 .word 0x1c
@@ -90,10 +90,10 @@ mul t3,s3,s4
 li t4,0                         
 loop_A:
 add t5,s0,t4                    
-lw  t6,0(t5)
+vle8_v v1,0(t5)
 add t5,t0,t4
-sw  t6,0(t5)
-addi t4,t4,4
+vse8_v v1,0(t5)
+addi t4,t4,8
 blt t4,t3,loop_A
 
 ## copy Matrix B to addrB 
@@ -103,10 +103,10 @@ mul t3,s4,s5
 li t4,0                         
 loop_B:
 add t5,s1,t4                    
-lw  t6,0(t5)
+vle8_v v1,0(t5)
 add t5,t1,t4
-sw  t6,0(t5)
-addi t4,t4,4
+vse8_v v1,0(t5)
+addi t4,t4,8
 blt t4,t3,loop_B
 
 ######################
@@ -203,18 +203,19 @@ sw zero,0(t4)
 # mul t3,s4,s5
 # add t4,t4,t3
 
-# ## load data from ACCEL_MEM_BASE_ADDR to chekout whether the data transfer is correct
-# vle8_v v1,0(t4)                     
-# vle8_v v2,8(t4)						
-# ## load data from ACCEL_REG_BASE_ADDR to checkout the control signal is correct
+## load data from ACCEL_MEM_BASE_ADDR to chekout whether the data transfer is correct
+vle8_v v1,0(t2)
+addi t2,t2,8     
+vle8_v v2,0(t2)						
+## load data from ACCEL_REG_BASE_ADDR to checkout the control signal is correct
 # vle8_v v3,0(t3)
 
 
 # ## load data from ACCEL_MEM_BASE_ADDR to reg(s0~3) to chekout whether the data transfer is correct
-lw s2,0(t2)
-lw s3,4(t2)
-lw s4,8(t2)
-lw s5,12(t2)
+# lw s2,0(t2)
+# lw s3,4(t2)
+# lw s4,8(t2)
+# lw s5,12(t2)
 
 
 

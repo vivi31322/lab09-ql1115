@@ -21,19 +21,19 @@ mul t3, s3, s4
 lui x29, 0x00000000
 addi x29, x29, 0x00000000
 add t5, s0, t4
-lw t6, 0(t5)
+vle8_v v1, 0(t5)
 add t5, t0, t4
-sw t6, 0(t5)
-addi t4, t4, 4
+vse8_v v1, 0(t5)
+addi t4, t4, 8
 blt t4, t3, loop_a
 mul t3, s4, s5
 lui x29, 0x00000000
 addi x29, x29, 0x00000000
 add t5, s1, t4
-lw t6, 0(t5)
+vle8_v v1, 0(t5)
 add t5, t1, t4
-sw t6, 0(t5)
-addi t4, t4, 4
+vse8_v v1, 0(t5)
+addi t4, t4, 8
 blt t4, t3, loop_b
 lui x31, 0x00000008
 addi x31, x31, 0x00000030
@@ -70,8 +70,7 @@ addi x31, x31, 0x00000001
 beq t5, t6, finish
 j x0, hang
 sw zero, 0(t4)
-lw s2, 0(t2)
-lw s3, 4(t2)
-lw s4, 8(t2)
-lw s5, 12(t2)
+vle8_v v1, 0(t2)
+addi t2, t2, 8
+vle8_v v2, 0(t2)
 hcf
