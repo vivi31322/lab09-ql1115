@@ -5,14 +5,13 @@ import chisel3.iotesters.{PeekPokeTester, Driver}
 import scala.language.implicitConversions
 
 class LocalMemTest(dut: LocalMem) extends PeekPokeTester(dut) {
-    step(10)
-
+    step(1)
 }
 
 object LocalMemTest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new LocalMem
+    () => new LocalMem(0x8000,32,64)
   ) { c: LocalMem =>
     new LocalMemTest(c)
   }

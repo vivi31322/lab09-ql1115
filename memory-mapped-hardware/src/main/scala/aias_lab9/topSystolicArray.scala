@@ -11,6 +11,7 @@ import aias_lab9.AXILite._
 object config {
   val addr_width = 32
   val data_width = 64
+  val reg_width = 32
   val addr_map = List(("h8000".U, "h10000".U), ("h100000".U, "h2FFFFF".U))
   val instr_hex_path = "src/main/resource/SystolicArray/m_code.hex"
   val data_mem_size = 16 // power of 2 in byte
@@ -31,7 +32,7 @@ class top extends Module {
 
   val cpu = Module(new VectorCPU(addr_width, data_width, instr_hex_path))
   val dm = Module(new DataMem(data_mem_size, addr_width, data_width, data_hex_path))
-  val sa = Module(new topSA(addr_width, data_width))
+  val sa = Module(new topSA(addr_width, data_width, reg_width))
   val bus = Module(new AXILiteXBar(1, addr_map.length, addr_width, data_width, addr_map))
 
   // AXI Lite Bus

@@ -4,9 +4,9 @@ import chisel3._
 import chisel3.util._
 import chisel3.stage.ChiselStage
 
-class tile(val rows:Int = 4,
-           val cols:Int = 4,
-           val bits:Int = 8) extends Module{
+class tile(rows:Int,
+           cols:Int,
+           bits:Int) extends Module{
     val io = IO(new Bundle{
         val input  = Input(Vec(rows,Valid(UInt(bits.W))))
         val weight = Input(Vec(cols,Valid(UInt(bits.W))))
@@ -42,11 +42,4 @@ class tile(val rows:Int = 4,
     }
 
     List.range(0,cols).map{x => io.output(x) <> sa(rows-1)(x).fwd_ps}
-}
-
-object tile extends App{
-    (new chisel3.stage.ChiselStage).emitVerilog(
-        new tile(),
-        args,
-    )
 }

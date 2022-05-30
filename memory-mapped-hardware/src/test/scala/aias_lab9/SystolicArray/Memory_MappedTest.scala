@@ -6,8 +6,8 @@ import scala.language.implicitConversions
 
 class Memory_MappedTest(dut: Memory_Mapped) extends PeekPokeTester(dut) {
     
-    // Read the first value of localMem
-    poke(dut.io.slave.readAddr.bits.addr,0x100000)
+    // Read the second value (STATUS) of localMem
+    poke(dut.io.slave.readAddr.bits.addr,0x100008)
     poke(dut.io.slave.readAddr.valid,true)
     poke(dut.io.slave.readData.ready,true)
     step(2)
@@ -17,8 +17,8 @@ class Memory_MappedTest(dut: Memory_Mapped) extends PeekPokeTester(dut) {
     poke(dut.io.slave.readData.ready,false)
     step(1)
 
-    // Read the third value of Regfile
-    poke(dut.io.slave.readAddr.bits.addr,0x00008)
+    // Read the second double-word value of localMem
+    poke(dut.io.slave.readAddr.bits.addr,0x200008)
     poke(dut.io.slave.readAddr.valid,true)
     poke(dut.io.slave.readData.ready,true)
     step(2)
@@ -55,7 +55,7 @@ class Memory_MappedTest(dut: Memory_Mapped) extends PeekPokeTester(dut) {
 object Memory_MappedTest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new Memory_Mapped
+    () => new Memory_Mapped(0x8000,32,64,32)
   ) { c: Memory_Mapped =>
     new Memory_MappedTest(c)
   }

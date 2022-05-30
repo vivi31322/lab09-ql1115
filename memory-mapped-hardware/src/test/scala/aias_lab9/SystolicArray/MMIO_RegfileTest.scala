@@ -12,7 +12,7 @@ class MMIO_RegfileTest(dut: MMIO_Regfile) extends PeekPokeTester(dut) {
 object MMIO_RegfileTest extends App {
   Driver.execute(
     Array("-tbn", "verilator"),
-    () => new MMIO_Regfile
+    () => new MMIO_Regfile(32,64)
   ) { c: MMIO_Regfile =>
     new MMIO_RegfileTest(c)
   }

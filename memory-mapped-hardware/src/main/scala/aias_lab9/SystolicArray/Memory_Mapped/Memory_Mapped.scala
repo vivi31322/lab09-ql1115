@@ -5,33 +5,35 @@ import chisel3.util._
 
 import aias_lab9.AXILite._
 
-class Memory_Mapped(val addrWidth:Int=32,
-                    val dataWidth:Int=64) extends Module{
+class Memory_Mapped(mem_size:Int,
+                    addr_width:Int,
+                    data_width:Int,
+                    reg_width:Int) extends Module{
     val io = IO(new Bundle{
         //for CPU to access the Reg and Memory
-        val slave = new AXILiteSlaveIF(addrWidth, dataWidth)
+        val slave = new AXILiteSlaveIF(addr_width, data_width)
 
         //for reg to access SA
-        val mmio = new MMIO
+        val mmio = new MMIO(reg_width)
 
         //for SA to read/write LocalMem when it still a slave
-        val raddr = Input(UInt(32.W))
-        val rdata = Output(UInt(32.W))
+        val raddr = Input(UInt(addr_width.W))
+        val rdata = Output(UInt(data_width.W))
 
         val wen   = Input(Bool())
-        val waddr = Input(UInt(32.W))
-        val wdata = Input(UInt(32.W))
+        val waddr = Input(UInt(addr_width.W))
+        val wdata = Input(UInt(data_width.W))
 
         // for making localMem print the value
         val finish = Input(Bool())
     })
 
-    val rf = Module(new MMIO_Regfile)
-    val lm = Module(new LocalMem)
+    val rf = Module(new MMIO_Regfile(addr_width,reg_width))
+    val lm = Module(new LocalMem(mem_size,addr_width,data_width))
 
     val ACCEL_REG_BASE_ADDR = 0x100000
     val ACCEL_MEM_BASE_ADDR = 0x200000
-
+    val byte = 8
 
     //slave port deafault value
         //WriteData channel
@@ -67,10 +69,10 @@ class Memory_Mapped(val addrWidth:Int=32,
         io.rdata := 0.U
     
     // the Regs used for CPU dominated
-    val RAReg = RegInit(0.U(32.W))
+    val RAReg = RegInit(0.U(addr_width.W))
     val RAReadyReg = RegInit(false.B)
     
-    val RDReg = RegInit(0.U(32.W))
+    val RDReg = RegInit(0.U(data_width.W))
     val RRReg = RegInit(false.B)
     val RDValidReg = RegInit(false.B)
 
@@ -78,10 +80,10 @@ class Memory_Mapped(val addrWidth:Int=32,
     // seems weird because read behavior of reg and SyncReadMem through AXI are different...
     val DoRead = RegNext(io.slave.readAddr.valid && io.slave.readAddr.ready && !RDValidReg)
 
-    val WAReg = RegInit(0.U(32.W))
+    val WAReg = RegInit(0.U(addr_width.W))
     val WAReadyReg = RegInit(false.B)
 
-    val WDReg = RegInit(0.U(32.W))
+    val WDReg = RegInit(0.U(data_width.W))
     val WDReadyReg = RegInit(false.B)
 
     val WRValidReg = RegInit(false.B)
@@ -98,27 +100,25 @@ class Memory_Mapped(val addrWidth:Int=32,
         // read behavior
         RAReadyReg := canDoRead
         io.slave.readAddr.ready := RAReadyReg
-        RAReg := io.slave.readAddr.bits.addr & ~(3.U(addrWidth.W))
-
-        // which module is read depends on addr
-        when(RAReg < ACCEL_MEM_BASE_ADDR.U){
-            rf.io.raddr := RAReg >> 2
-        }.otherwise{
-            lm.io.raddr := RAReg - ACCEL_MEM_BASE_ADDR.U
-        }
+        RAReg := Mux(canDoRead,io.slave.readAddr.bits.addr,RAReg)
+        
+        rf.io.raddr := Mux((ACCEL_REG_BASE_ADDR.U <= RAReg && RAReg < ACCEL_MEM_BASE_ADDR.U), (RAReg - ACCEL_REG_BASE_ADDR.U) >> 2, 0.U)
+        lm.io.raddr := Mux((ACCEL_MEM_BASE_ADDR.U <= RAReg),(RAReg - ACCEL_MEM_BASE_ADDR.U),0.U)
 
         RDValidReg := DoRead
         RRReg := DoRead
         io.slave.readData.valid := RDValidReg
 
         when(RAReg < ACCEL_MEM_BASE_ADDR.U){
-            RDReg := Mux(DoRead,rf.io.rdata,0.U)
+            RDReg := Mux(DoRead,Cat(0.U(32.W),rf.io.rdata),0.U)
         }.otherwise{
             RDReg := Mux(DoRead,lm.io.rdata,0.U)
         }
         io.slave.readData.bits.data := RDReg
+        io.slave.readData.bits.resp := RRReg
 
-        
+        //==================================================================================================================
+
         //write behavior
         WAReadyReg := canDoWrite
         WDReadyReg := canDoWrite
@@ -126,25 +126,22 @@ class Memory_Mapped(val addrWidth:Int=32,
         io.slave.writeAddr.ready := WAReadyReg
         io.slave.writeData.ready := WDReadyReg
 
-        when (canDoWrite){
-            WAReg := io.slave.writeAddr.bits.addr & ~(3.U(addrWidth.W))
-            WDReg := io.slave.writeData.bits.data
-        }
+        WAReg := Mux(canDoWrite,io.slave.writeAddr.bits.addr,0.U)
+        WDReg := Mux(canDoWrite,io.slave.writeData.bits.data,0.U)
 
-        
         when(DoWrite){
             rf.io.waddr := WAReg >> 2
             lm.io.waddr := WAReg - ACCEL_MEM_BASE_ADDR.U
-            rf.io.wdata := WDReg
+
+            rf.io.wdata := WDReg(31,0)
             lm.io.wdata := WDReg
+
             rf.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,true.B,false.B)
             lm.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,false.B,true.B)
         }
 
         WRValidReg := DoWrite && !WRValidReg
         io.slave.writeResp.valid  := WRValidReg
-
-
     }
     // SA dominated
     .otherwise{
