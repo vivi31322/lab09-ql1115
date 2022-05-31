@@ -33,9 +33,9 @@ class tileTest(dut: tile) extends PeekPokeTester(dut){
         println()
     }
 
-    val mat_size = dut.rows
-    val rows = dut.rows
-    val cols = dut.cols
+    val mat_size = 4
+    val rows = 4
+    val cols = 4
     val a_mat = matInit(mat_size,0)
     val b_mat = matInit(mat_size,1)
     val c_mat = mmul(a_mat,b_mat)
@@ -125,7 +125,7 @@ class tileTest(dut: tile) extends PeekPokeTester(dut){
 }
 
 object tileTest extends App{
-    Driver.execute(args,()=>new tile){
+    Driver.execute(args,()=>new tile(4,4,8)){
         c:tile => new tileTest(c)
     }
 }

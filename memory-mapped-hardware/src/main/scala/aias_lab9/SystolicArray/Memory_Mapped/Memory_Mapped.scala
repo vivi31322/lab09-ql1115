@@ -23,6 +23,7 @@ class Memory_Mapped(mem_size:Int,
         val wen   = Input(Bool())
         val waddr = Input(UInt(addr_width.W))
         val wdata = Input(UInt(data_width.W))
+        val wstrb = Input(UInt((data_width>>3).W))
 
         // for making localMem print the value
         val finish = Input(Bool())
@@ -62,6 +63,7 @@ class Memory_Mapped(mem_size:Int,
         lm.io.raddr := 0.U
         lm.io.waddr := 0.U
         lm.io.wdata := 0.U
+        lm.io.wstrb := 0.U
         lm.io.wen := false.B
         lm.io.finish := io.finish
 
@@ -84,6 +86,7 @@ class Memory_Mapped(mem_size:Int,
     val WAReadyReg = RegInit(false.B)
 
     val WDReg = RegInit(0.U(data_width.W))
+    val WSReg = RegInit(0.U((data_width>>3).W))
     val WDReadyReg = RegInit(false.B)
 
     val WRValidReg = RegInit(false.B)
@@ -128,6 +131,7 @@ class Memory_Mapped(mem_size:Int,
 
         WAReg := Mux(canDoWrite,io.slave.writeAddr.bits.addr,0.U)
         WDReg := Mux(canDoWrite,io.slave.writeData.bits.data,0.U)
+        WSReg := Mux(canDoWrite,io.slave.writeData.bits.strb,0.U)
 
         when(DoWrite){
             rf.io.waddr := WAReg >> 2
@@ -135,6 +139,8 @@ class Memory_Mapped(mem_size:Int,
 
             rf.io.wdata := WDReg(31,0)
             lm.io.wdata := WDReg
+
+            lm.io.wstrb := WSReg
 
             rf.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,true.B,false.B)
             lm.io.wen := Mux(io.slave.writeAddr.bits.addr < ACCEL_MEM_BASE_ADDR.U,false.B,true.B)
@@ -166,6 +172,7 @@ class Memory_Mapped(mem_size:Int,
         // write value to localMem
         lm.io.waddr := io.waddr
         lm.io.wdata := io.wdata
+        lm.io.wstrb := io.wstrb
         lm.io.wen := io.wen
 
         // write status and enable to Regfile

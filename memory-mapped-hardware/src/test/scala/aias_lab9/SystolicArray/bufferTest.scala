@@ -17,7 +17,7 @@ class bufferTest(dut: buffer) extends PeekPokeTester(dut){
 }
 
 object bufferTest extends App{
-    Driver.execute(args,()=>new buffer){
+    Driver.execute(args,()=>new buffer(4,8)){
         c:buffer => new bufferTest(c)
     }
 }
