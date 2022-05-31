@@ -15,57 +15,24 @@ class LocalMem(mem_size:Int,
         val wen   = Input(Bool())
         val waddr = Input(UInt(addr_width.W))
         val wdata = Input(UInt(data_width.W))
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
         val wstrb = Input(UInt((data_width>>3).W))
->>>>>>> Stashed changes
-=======
-        val wstrb = Input(UInt((data_width>>3).W))
->>>>>>> Stashed changes
 
         // for printing need
         val finish = Input(Bool())
     })
 
     val byte = 8
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-    val localMem = SyncReadMem(mem_size,UInt(byte.W))
-    loadMemoryFromFile(localMem,"src/main/resource/SystolicArray/LocalMem.hex")
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
     val localMem = SyncReadMem(mem_size,UInt(byte.W))
     // loadMemoryFromFile(localMem,"src/main/resource/SystolicArray/LocalMem.hex")
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
     val raddr_aligned = WireDefault(io.raddr & ~(7.U(data_width.W)))
     val waddr_aligned = WireDefault(io.waddr & ~(7.U(data_width.W)))
->>>>>>> Stashed changes
-=======
-    val raddr_aligned = WireDefault(io.raddr & ~(7.U(data_width.W)))
-    val waddr_aligned = WireDefault(io.waddr & ~(7.U(data_width.W)))
->>>>>>> Stashed changes
-    
-    
+     
     val rdata = WireDefault(
         List.range(0,data_width>>3).map{x=>
             //data_width>>3 === 64/8=8
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            localMem(io.raddr+x.U) << (((data_width>>3)-1-x)*byte)
-=======
             localMem(raddr_aligned+x.U) << (((data_width>>3)-1-x)*byte)
->>>>>>> Stashed changes
-=======
-            localMem(raddr_aligned+x.U) << (((data_width>>3)-1-x)*byte)
->>>>>>> Stashed changes
         }.reduce(_+_)
     )
 
@@ -73,19 +40,9 @@ class LocalMem(mem_size:Int,
 
     when(io.wen){
         List.range(0,data_width>>3).map{x=>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            localMem(io.waddr + (x.U)) := io.wdata((x+1)*byte-1,x*byte)
-=======
             when(io.wstrb(x)===1.U){
                 localMem(waddr_aligned + (x.U)) := io.wdata((x+1)*byte-1,x*byte)
             }
->>>>>>> Stashed changes
-=======
-            when(io.wstrb(x)===1.U){
-                localMem(waddr_aligned + (x.U)) := io.wdata((x+1)*byte-1,x*byte)
-            }
->>>>>>> Stashed changes
         }
     }
         
