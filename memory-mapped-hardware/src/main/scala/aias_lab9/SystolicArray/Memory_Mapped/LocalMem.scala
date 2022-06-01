@@ -24,7 +24,7 @@ class LocalMem(mem_size:Int,
     val byte = 8
 
     val localMem = SyncReadMem(mem_size,UInt(byte.W))
-    // loadMemoryFromFile(localMem,"src/main/resource/SystolicArray/LocalMem.hex")
+    loadMemoryFromFile(localMem,"src/main/resource/SystolicArray/LocalMem.hex")
 
     val raddr_aligned = WireDefault(io.raddr & ~(7.U(data_width.W)))
     val waddr_aligned = WireDefault(io.waddr & ~(7.U(data_width.W)))
