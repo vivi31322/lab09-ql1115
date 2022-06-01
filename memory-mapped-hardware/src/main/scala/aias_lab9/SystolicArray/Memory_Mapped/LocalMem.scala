@@ -72,7 +72,7 @@ class LocalMem(mem_size:Int,
 
     
     when(io.finish){
-        printf("\n\t\tLocal Memory Value: (Unit:Word) \n")
+        printf("\n\t\tLocal Memory Value: (Unit:Double Word) \n")
 
         for(i <- 0 until 6){
             var data = Cat(localMem(8*i+7),

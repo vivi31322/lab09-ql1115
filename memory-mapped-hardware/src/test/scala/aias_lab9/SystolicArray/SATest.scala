@@ -13,6 +13,8 @@ class SATest(dut: SA) extends PeekPokeTester(dut) {
     poke(dut.io.mmio.ENABLE_OUT,true)
     step(1)
   }
+  poke(dut.io.mmio.ENABLE_OUT,false)
+  step(5)
 }
 
 object SATest extends App {
