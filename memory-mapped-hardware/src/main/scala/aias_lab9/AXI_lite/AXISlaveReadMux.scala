@@ -19,7 +19,7 @@ class AXISlaveReadMux(val nMasters: Int, val addrWidth: Int, val dataWidth: Int)
   })
 
   val arbiter = Module(new RRArbiter(new AXILiteAddress(addrWidth), nMasters))
-
+  val chosen_reg = RegNext(arbiter.io.chosen.asUInt)
   for (i <- 0 until nMasters) {
     arbiter.io.in(i) <> io.ins(i).readAddr
   }
@@ -31,5 +31,5 @@ class AXISlaveReadMux(val nMasters: Int, val addrWidth: Int, val dataWidth: Int)
     io.ins(i).readData.valid := false.B
     io.ins(i).readData.bits.resp := 0.U
   }
-  io.ins(arbiter.io.chosen.asUInt).readData <> io.out.readData
+  io.ins(chosen_reg).readData <> io.out.readData
 }
