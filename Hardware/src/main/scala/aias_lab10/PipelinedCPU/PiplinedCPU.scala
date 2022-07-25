@@ -31,6 +31,11 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
         val Stall_DH = Output(Bool())
         val ID_PC = Output(UInt(memAddrWidth.W))
         val EXE_PC = Output(UInt(memAddrWidth.W))
+        val MEM_PC = Output(UInt(memAddrWidth.W))
+        val WB_PC = Output(UInt(memAddrWidth.W))
+        val EXE_alu_out = Output(UInt(32.W))
+        val WB_rd = Output(UInt(5.W))
+        val WB_wdata = Output(UInt(32.W))
     })
     
     //Module
@@ -154,8 +159,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.DataMem.Mem_R := ct.io.DM_Mem_R
     io.DataMem.Mem_W :=  ct.io.DM_Mem_W
     io.DataMem.Length :=  ct.io.DM_Length
-    io.DataMem.raddr := stage_MEM.io.alu_out(15,0)
-    io.DataMem.waddr := stage_MEM.io.alu_out(15,0)
+    io.DataMem.raddr := stage_MEM.io.alu_out(memAddrWidth-1,0)
+    io.DataMem.waddr := stage_MEM.io.alu_out(memAddrWidth-1,0)
     io.DataMem.wdata := stage_MEM.io.rs2_rdata
 
     // WB stage reg
@@ -204,11 +209,16 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.regs := rf.io.regs
     io.Hcf := ct.io.Hcf
 
-    //Test 
+    // Test 
     io.E_Branch_taken := ct.io.E_Branch_taken
     io.Flush := ct.io.Flush
     io.Stall_MA := ct.io.Stall_MA
     io.Stall_DH := ct.io.Stall_DH
     io.ID_PC := stage_ID.io.pc
     io.EXE_PC := stage_EXE.io.pc
+    io.MEM_PC := stage_MEM.io.pc
+    io.WB_PC := Mux(stage_WB.io.pc_plus4 > 0.U ,stage_WB.io.pc_plus4 - 4.U,stage_WB.io.pc_plus4)
+    io.EXE_alu_out := alu.io.out
+    io.WB_wdata := wb_data_wire
+    io.WB_rd := stage_WB.io.inst(11,7)
 }

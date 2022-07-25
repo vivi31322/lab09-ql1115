@@ -24,13 +24,19 @@ default: all
 RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
 RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
-RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --all-headers --disassemble-all --disassemble-zeroes --section=.text --section=.data
+RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --full-contents --all-headers --disassemble-all --disassemble-zeroes --section=.text --section=.data
 RISCV_ASMDUMP ?= $(RISCV_PREFIX)objdump --disassemble --disassemble-zeroes --no-addresses --prefix-addresses --demangle --no-show-raw-insn --section=.text
-RISCV_IMDUMP ?= $(RISCV_PREFIX)objdump --disassemble --disassemble-zeroes --no-addresses --prefix-addresses --show-raw-insn --section=.text
-RISCV_DMDUMP ?= $(RISCV_PREFIX)objdump --disassemble --disassemble-zeroes --no-addresses --prefix-addresses --show-raw-insn --section=.data
+
+RISCV_IMDUMP ?= $(RISCV_PREFIX)objdump --disassemble --disassemble-zeroes --no-addresses --prefix-addresses  --show-raw-insn --section=.text
+
+RISCV_DMDUMP ?= $(RISCV_PREFIX)objdump --full-contents --section=.data
+
 DUMP_INST_TO_BYTE ?=  awk -v f=0 'f==1 && $$1=="00000073"{print "0b";print "00";print "00"; print "00"; } f==1 && $$1!="00000073"{print substr($$1,7,2);print substr($$1,5,2);print substr($$1,3,2);print substr($$1,1,2);} /Disassembly of section/{f=1;}'
-DUMP_DATA_TO_BYTE ?=  awk -v f=0 'f==1 {print substr($$1,7,2);print substr($$1,5,2);print substr($$1,3,2);print substr($$1,1,2);} /Disassembly of section/{f=1;}'
+
+DUMP_DATA_TO_BYTE ?=  awk -v f=0 'f==1 {print substr($$2,1,2);print substr($$2,3,2);print substr($$2,5,2);print substr($$2,7,2);print substr($$3,1,2);print substr($$3,3,2);print substr($$3,5,2);print substr($$3,7,2);print substr($$4,1,2);print substr($$4,3,2);print substr($$4,5,2);print substr($$4,7,2);print substr($$5,1,2);print substr($$5,3,2);print substr($$5,5,2);print substr($$5,7,2);} /Contents of section .data/{f=1;}'
+
 BYTE_TO_HEX ?= awk '!/^$$/'
+
 DUMP_INST_TO_ASM ?= awk -v f=0 'f==1 && $$1=="ecall" {print "hcf"} f==1 && $$1!="ecall" {print $$1,$$2}/Disassembly of section/{f=1;}'
 
 vpath %.S $(src_dir)

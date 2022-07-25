@@ -116,8 +116,7 @@ reset_vector:                                                           \
         .align 4; .global begin_signature; begin_signature:
 
 #define RVTEST_DATA_END \
-	data_end: .byte 0x0; \
-	.align 4; \
-	.global end_signature; end_signature:
+	data_end: .byte 0; \
+	.align 4;
 
 #endif

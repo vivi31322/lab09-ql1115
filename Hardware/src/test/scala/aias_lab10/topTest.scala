@@ -12,11 +12,31 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     val lines = Source.fromFile(filename).getLines.toList
 
     while(!peek(dut.io.Hcf)){
-        var current_pc = peek(dut.io.pc).toInt
-        println("Inst:"+lines(current_pc>>2))
-        println("PC_IF:\t" + peek(dut.io.pc).toString + "\t" + "PC_ID:\t" + peek(dut.io.ID_PC).toString + "\t" + "PC_EXE:\t" + peek(dut.io.EXE_PC).toString)
-        println("EXE Br taken: \t" + peek(dut.io.E_Branch_taken).toString + "\t" + "Flush:\t" +  peek(dut.io.Flush).toString)
-        println("Stall_MA: " + peek(dut.io.Stall_MA).toString + "\t" + "Stall_DH:\t" +  peek(dut.io.Stall_DH).toString)
+        var PC_IF = peek(dut.io.pc).toInt
+        var PC_ID = peek(dut.io.ID_PC).toInt
+        var PC_EXE = peek(dut.io.EXE_PC).toInt
+        var PC_MEM = peek(dut.io.MEM_PC).toInt
+        var PC_WB = peek(dut.io.WB_PC).toInt
+
+        val E_BT = peek(dut.io.E_Branch_taken).toInt
+        val Flush = peek(dut.io.Flush).toInt
+        val Stall_MA = peek(dut.io.Stall_MA).toInt
+        val Stall_DH = peek(dut.io.Stall_DH).toInt
+        val alu_out = (peek(dut.io.EXE_alu_out).toInt.toHexString).replace(' ', '0')
+        val DM_rdata = (peek(dut.io.rdata).toInt.toHexString).replace(' ', '0')
+        val DM_raddr = (peek(dut.io.raddr).toInt.toHexString).replace(' ', '0')
+        val WB_reg = peek(dut.io.WB_rd).toInt
+        val WB_wdata = (peek(dut.io.WB_wdata).toInt.toHexString).replace(' ', '0')
+
+        println(s"[PC_IF ]${"%8d".format(PC_IF)} [Inst] ${"%-25s".format(lines(PC_IF>>2))} ")
+        println(s"[PC_ID ]${"%8d".format(PC_ID)} [Inst] ${"%-25s".format(lines(PC_ID>>2))} ")
+        println(s"[PC_EXE]${"%8d".format(PC_EXE)} [Inst] ${"%-25s".format(lines(PC_EXE>>2))} "+ 
+                s"[Br taken] ${"%1d".format(E_BT)} [ALU Out]${"%8s".format(alu_out)}")
+        println(s"[PC_MEM]${"%8d".format(PC_MEM)} [Inst] ${"%-25s".format(lines(PC_MEM>>2))} "+
+                s"[DM Raddr]${"%8s".format(DM_raddr)} [DM Rdata]${"%8s".format(DM_rdata)}")
+        println(s"[PC_WB ]${"%8d".format(PC_WB)} [Inst] ${"%-25s".format(lines(PC_WB>>2))} "+
+                s"[ WB reg ]${"%8d".format(WB_reg)} [WB  data]${"%8s".format(WB_wdata)}")
+        println(s"[Flush ] ${"%1d".format(Flush)} [Stall_MA ] ${"%1d".format(Stall_MA)} [Stall_DH ] ${"%1d".format(Stall_DH)}")
         println("==============================================")
         step(1)
     }

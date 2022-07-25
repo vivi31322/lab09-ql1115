@@ -33,4 +33,9 @@ jalr x25, 132(x0)
 add x10, x5, x6
 jal x0, exit
 sll x12, x5, x8
+nop
+nop
+nop
+nop
+nop
 hcf

@@ -20,8 +20,8 @@ class ALU extends Module{
   switch(io.ALUSel){
     is(ADD ){io.out := io.src1+io.src2}
     is(SLL ){io.out := io.src1 << io.src2(4,0)}
-    is(SLT ){io.out := Mux(io.src1.asSInt<io.src2.asSInt,1.U,0.U)}
-    is(SLTU){io.out := Mux(io.src1<io.src2              ,1.U,0.U)}
+    is(SLT ){io.out := Mux(io.src1.asSInt < io.src2.asSInt,1.U,0.U)}
+    is(SLTU){io.out := Mux(io.src1 < io.src2              ,1.U,0.U)}
     is(XOR ){io.out := io.src1^io.src2}
     is(SRL ){io.out := io.src1 >> io.src2(4,0)}
     is(OR  ){io.out := io.src1|io.src2}

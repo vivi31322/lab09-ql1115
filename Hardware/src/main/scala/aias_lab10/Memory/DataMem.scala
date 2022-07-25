@@ -6,18 +6,18 @@ import chisel3.util.experimental.loadMemoryFromFile
 
 
 object wide {
-  val Byte = 0.U
-  val Half = 1.U
-  val Word = 2.U
-  val UByte = 4.U
-  val UHalf = 5.U
+  val Byte = "b000".U
+  val Half = "b001".U
+  val Word = "b010".U
+  val UByte = "b100".U
+  val UHalf = "b101".U
 }
 
 import wide._
 
 class DataMem(bits:Int) extends Module {
   val io = IO(new Bundle {
-    val funct3 = Input(UInt(32.W))
+    val funct3 = Input(UInt(3.W))
     val raddr = Input(UInt(bits.W))
     val rdata = Output(UInt(32.W))
     

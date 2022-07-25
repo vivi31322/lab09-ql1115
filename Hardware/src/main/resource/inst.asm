@@ -1,219 +1,41 @@
-j <reset_vector>
-li ra,0
-li sp,0
-li gp,0
-li tp,0
-li t0,0
-li t1,0
-li t2,0
-li s0,0
-li s1,0
-li a0,0
-li a1,0
-li a2,0
-li a3,0
-li a4,0
-li a5,0
-li a6,0
-li a7,0
-li s2,0
-li s3,0
-li s4,0
-li s5,0
-li s6,0
-li s7,0
-li s8,0
-li s9,0
-li s10,0
-li s11,0
-li t3,0
-li t4,0
-li t5,0
-li t6,0
-li gp,0
-li a0,1
-slli a0,a0,0x1f
-bltz a0,<test_2>
-nop 
-li gp,1
-li a7,93
-li a0,0
-li gp,2
-li ra,0
-mv a4,ra
-li t2,0
-bne a4,t2,<fail>
-li gp,3
-li ra,1
-addi a4,ra,1
-li t2,2
-bne a4,t2,<fail>
-li gp,4
-li ra,3
-addi a4,ra,7
-li t2,10
-bne a4,t2,<fail>
-li gp,5
-li ra,0
-addi a4,ra,-2048
-li t2,-2048
-bne a4,t2,<fail>
-li gp,6
-lui ra,0x80000
-mv a4,ra
-lui t2,0x80000
-bne a4,t2,<fail>
-li gp,7
-lui ra,0x80000
-addi a4,ra,-2048
-lui t2,0x80000
-addi t2,t2,-2048
-bne a4,t2,<fail>
-li gp,8
-li ra,0
-addi a4,ra,2047
-li t2,2047
-bne a4,t2,<fail>
-li gp,9
-lui ra,0x80000
-addi ra,ra,-1
-mv a4,ra
-lui t2,0x80000
-addi t2,t2,-1
-bne a4,t2,<fail>
-li gp,10
-lui ra,0x80000
-addi ra,ra,-1
-addi a4,ra,2047
-lui t2,0x80000
-addi t2,t2,2046
-bne a4,t2,<fail>
-li gp,11
-lui ra,0x80000
-addi a4,ra,2047
-lui t2,0x80000
-addi t2,t2,2047
-bne a4,t2,<fail>
-li gp,12
-lui ra,0x80000
-addi ra,ra,-1
-addi a4,ra,-2048
-lui t2,0x7ffff
-addi t2,t2,2047
-bne a4,t2,<fail>
-li gp,13
-li ra,0
-addi a4,ra,-1
-li t2,-1
-bne a4,t2,<fail>
-li gp,14
-li ra,-1
-addi a4,ra,1
-li t2,0
-bne a4,t2,<fail>
-li gp,15
-li ra,-1
-addi a4,ra,-1
-li t2,-2
-bne a4,t2,<fail>
-li gp,16
-lui ra,0x80000
-addi ra,ra,-1
-addi a4,ra,1
-lui t2,0x80000
-bne a4,t2,<fail>
-li gp,17
-li ra,13
-addi ra,ra,11
-li t2,24
-bne ra,t2,<fail>
-li gp,18
-li tp,0
-li ra,13
-addi a4,ra,11
-mv t1,a4
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_18+0x8>
-li t2,24
-bne t1,t2,<fail>
-li gp,19
-li tp,0
-li ra,13
-addi a4,ra,10
-nop 
-mv t1,a4
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_19+0x8>
-li t2,23
-bne t1,t2,<fail>
-li gp,20
-li tp,0
-li ra,13
-addi a4,ra,9
-nop 
-nop 
-mv t1,a4
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_20+0x8>
-li t2,22
-bne t1,t2,<fail>
-li gp,21
-li tp,0
-li ra,13
-addi a4,ra,11
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_21+0x8>
-li t2,24
-bne a4,t2,<fail>
-li gp,22
-li tp,0
-li ra,13
-nop 
-addi a4,ra,10
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_22+0x8>
-li t2,23
-bne a4,t2,<fail>
-li gp,23
-li tp,0
-li ra,13
-nop 
-nop 
-addi a4,ra,9
-addi tp,tp,1
-li t0,2
-bne tp,t0,<test_23+0x8>
-li t2,22
-bne a4,t2,<fail>
-li gp,24
-li ra,32
-li t2,32
-bne ra,t2,<fail>
-li gp,25
-li ra,33
-addi zero,ra,50
-li t2,0
-bne zero,t2,<fail>
-bne zero,gp,<pass>
-nop 
-beqz gp,<fail+0x4>
-slli gp,gp,0x1
-ori gp,gp,1
-li a7,93
-mv a0,gp
-j <pass_fail_end>
-nop 
-li gp,1
-li a7,93
-li a0,0
-nop 
-nop 
-nop 
-nop 
-nop 
+addi x1, x0, 16
+slli x2, x1, 3
+xori x3, x2, 0x800
+slti x4, x2, -3
+sltiu x5, x2, -3
+srli x6, x3, 2
+srai x7, x3, 2
+ori x8, x0, 123
+andi x9, x5, -1
+add x10, x5, x6
+sub x11, x3, x7
+sll x12, x5, x8
+slt x13, x7, x9
+sltu x14, x9, x2
+xor x15, x11, x3
+srl x16, x13, x4
+sra x17, x15, x5
+or x18, x17, x1
+and x19, x13, x10
+sb x3, 3(x0)
+sw x1, 4(x0)
+lb x20, 3(x0)
+lw x21, 4(x0)
+lbu x22, 3(x0)
+lui x24, 0x1238
+beq x1, x2, hello
+bne x1, x1, hello
+blt x1, x0, hello
+bge x3, x0, hello
+bltu x3, x11, hello
+bgeu x11, x3, hello
+jalr x25, 132(x0)
+add x10, x5, x6
+jal x0, exit
+sll x12, x5, x8
+nop
+nop
+nop
+nop
+nop
 hcf

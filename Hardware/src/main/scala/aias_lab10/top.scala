@@ -24,6 +24,12 @@ class top extends Module {
         val Stall_DH = Output(Bool())
         val ID_PC = Output(UInt(32.W))
         val EXE_PC = Output(UInt(32.W))
+        val MEM_PC = Output(UInt(32.W))
+        val WB_PC = Output(UInt(32.W))
+        val EXE_alu_out = Output(UInt(32.W))
+        val raddr = Output(UInt(32.W))
+        val WB_rd = Output(UInt(5.W))
+        val WB_wdata = Output(UInt(32.W))
 
     })
 
@@ -44,7 +50,7 @@ class top extends Module {
     //Data Memory
     dm.io.funct3 := cpu.io.DataMem.Length
     dm.io.raddr := cpu.io.DataMem.raddr
-    dm.io.wen := ( cpu.io.DataMem.Mem_R || cpu.io.DataMem.Mem_W )
+    dm.io.wen := cpu.io.DataMem.Mem_W
     dm.io.waddr := cpu.io.DataMem.waddr
     dm.io.wdata := cpu.io.DataMem.wdata
 
@@ -62,6 +68,12 @@ class top extends Module {
     io.Stall_DH := cpu.io.Stall_DH
     io.ID_PC := cpu.io.ID_PC
     io.EXE_PC := cpu.io.EXE_PC
+    io.MEM_PC := cpu.io.MEM_PC
+    io.WB_PC := cpu.io.WB_PC
+    io.EXE_alu_out := cpu.io.EXE_alu_out
+    io.raddr := cpu.io.DataMem.raddr
+    io.WB_rd := cpu.io.WB_rd
+    io.WB_wdata := cpu.io.WB_wdata
 }
 
 
