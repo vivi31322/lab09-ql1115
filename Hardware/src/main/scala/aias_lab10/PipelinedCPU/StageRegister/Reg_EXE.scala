@@ -33,20 +33,20 @@ class Reg_EXE(addrWidth:Int) extends Module {
     val BP_taken_Reg =  RegInit(false.B)
 
     /*** stage Registers Action ***/
-    when(io.Flush){
-        immReg := 0.U(32.W)
-        InstReg := 0.U(32.W)
-        pcReg := 0.U(addrWidth.W)
-        rs1Reg := 0.U(32.W)
-        rs2Reg := 0.U(32.W)
-        BP_taken_Reg := false.B
-    }.elsewhen(io.Stall){
+    when(io.Stall){
         immReg := immReg
         InstReg := InstReg
         pcReg := pcReg
         rs1Reg := rs1Reg
         rs2Reg := rs2Reg
         BP_taken_Reg := BP_taken_Reg
+    }.elsewhen(io.Flush){
+        immReg := 0.U(32.W)
+        InstReg := 0.U(32.W)
+        pcReg := 0.U(addrWidth.W)
+        rs1Reg := 0.U(32.W)
+        rs2Reg := 0.U(32.W)
+        BP_taken_Reg := false.B
     }.otherwise{
         InstReg := io.inst_in
         immReg := io.imm_in

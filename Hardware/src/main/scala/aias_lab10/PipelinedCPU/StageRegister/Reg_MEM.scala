@@ -5,7 +5,6 @@ import chisel3.util._
 
 class Reg_MEM(addrWidth:Int) extends Module {
     val io = IO(new Bundle{
-        val Flush = Input(Bool())
         val Stall = Input(Bool())
         
         val pc_in = Input(UInt(addrWidth.W))
@@ -26,12 +25,7 @@ class Reg_MEM(addrWidth:Int) extends Module {
     val rs2Reg = RegInit(0.U(32.W))
 
     /*** stage Registers Action ***/
-    when(io.Flush){
-        InstReg := 0.U(32.W)
-        pcReg := 0.U(addrWidth.W)
-        aluReg := 0.U(32.W)
-        rs2Reg := 0.U(32.W)
-    }.elsewhen(io.Stall){
+    when(io.Stall){
         InstReg := InstReg
         pcReg := pcReg
         aluReg := aluReg

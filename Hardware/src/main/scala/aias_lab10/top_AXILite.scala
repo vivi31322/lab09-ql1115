@@ -7,7 +7,7 @@ import aias_lab10.PiplinedCPU._
 import aias_lab10.Memory._
 import aias_lab10.MemIF._
 
-class top extends Module {
+class top_AXILite extends Module {
     val io = IO(new Bundle{
         val pc = Output(UInt(15.W))
         val regs = Output(Vec(32,UInt(32.W)))

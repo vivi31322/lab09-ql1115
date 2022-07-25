@@ -33,6 +33,10 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
         val EXE_PC = Output(UInt(memAddrWidth.W))
         val MEM_PC = Output(UInt(memAddrWidth.W))
         val WB_PC = Output(UInt(memAddrWidth.W))
+        val EXE_src1 = Output(UInt(32.W))
+        val EXE_src2 = Output(UInt(32.W))
+        val EXE_src1_sel = Output(UInt(2.W))
+        val EXE_src2_sel = Output(UInt(2.W))
         val EXE_alu_out = Output(UInt(32.W))
         val WB_rd = Output(UInt(5.W))
         val WB_wdata = Output(UInt(32.W))
@@ -102,8 +106,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     ig.io.inst_31_7 := stage_ID.io.inst(31,7)
     
     // EXE stage reg
-    stage_EXE.io.Flush := ct.io.Flush
-    stage_EXE.io.Stall := (ct.io.Stall_DH || ct.io.Stall_MA || ct.io.Hcf)
+    stage_EXE.io.Flush := (ct.io.Flush || ct.io.Stall_DH) // Make a Bubble (nop)
+    stage_EXE.io.Stall := (ct.io.Stall_MA || ct.io.Hcf)
     stage_EXE.io.pc_in := stage_ID.io.pc
     stage_EXE.io.inst_in := stage_ID.io.inst
     stage_EXE.io.imm_in := ig.io.imm
@@ -149,7 +153,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     
     // MEM stage reg
     stage_MEM.io.Stall := (ct.io.Stall_MA || ct.io.Hcf)
-    stage_MEM.io.Flush := ct.io.Stall_DH // Make a Bubble (nop)
     stage_MEM.io.pc_in := stage_EXE.io.pc
     stage_MEM.io.inst_in := stage_EXE.io.inst
     stage_MEM.io.rs2_rdata_in := E_rs2_rdata
@@ -219,6 +222,10 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.MEM_PC := stage_MEM.io.pc
     io.WB_PC := Mux(stage_WB.io.pc_plus4 > 0.U ,stage_WB.io.pc_plus4 - 4.U,stage_WB.io.pc_plus4)
     io.EXE_alu_out := alu.io.out
+    io.EXE_src1 := E_rs1_rdata
+    io.EXE_src2 := E_rs2_rdata
+    io.EXE_src1_sel := ct.io.E_rs1_data_sel
+    io.EXE_src2_sel := ct.io.E_rs2_data_sel
     io.WB_wdata := wb_data_wire
     io.WB_rd := stage_WB.io.inst(11,7)
 }

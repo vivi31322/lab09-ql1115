@@ -4,7 +4,7 @@ import scala.io.Source
 import chisel3.iotesters.{PeekPokeTester,Driver}
 import scala.language.implicitConversions
 
-class topTest(dut:top) extends PeekPokeTester(dut){
+class topTest_AXILite(dut:top_AXILite) extends PeekPokeTester(dut){
 
     implicit def bigint2boolean(b:BigInt):Boolean = if (b>0) true else false
 
@@ -74,8 +74,8 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     }
 }
 
-object topTest extends App{
-    Driver.execute(args,()=>new top){
-        c:top => new topTest(c)
+object topTest_AXILite extends App{
+    Driver.execute(args,()=>new top_AXILite){
+        c:top_AXILite => new topTest_AXILite(c)
     }
 }

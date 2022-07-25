@@ -23,14 +23,15 @@ class Reg_ID(addrWidth:Int) extends Module {
     val BP_taken_Reg =  RegInit(false.B)
 
     /*** stage Registers Action ***/
-    when(io.Flush){
-        InstReg := 0.U(32.W)
-        pcReg := 0.U(addrWidth.W)
-        BP_taken_Reg := false.B
-    }.elsewhen(io.Stall){
+    
+    when(io.Stall){
         InstReg := InstReg
         pcReg := pcReg
         BP_taken_Reg := BP_taken_Reg
+    }.elsewhen(io.Flush){
+        InstReg := 0.U(32.W)
+        pcReg := 0.U(addrWidth.W)
+        BP_taken_Reg := false.B
     }.otherwise{
         InstReg := io.inst_in
         pcReg := io.pc_in

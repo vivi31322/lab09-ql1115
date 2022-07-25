@@ -82,6 +82,7 @@ class Controller(memAddrWidth: Int) extends Module {
   val EXE_funct3 = io.EXE_Inst(14, 12)
   val EXE_rs1 = io.EXE_Inst(19,15)
   val EXE_rs2 = io.EXE_Inst(24,20)
+  val EXE_rd = io.EXE_Inst(11, 7)
   val EXE_funct7 = io.EXE_Inst(31, 25)
 
   val MEM_opcode = io.MEM_Inst(6, 0)
@@ -319,6 +320,9 @@ class Controller(memAddrWidth: Int) extends Module {
   val is_W_use_rd = W_reg_en
 
   // Hazard condition (rd, rs overlap)
+  val is_D_rs1_E_rd_overlap_in_load = Wire(Bool())
+  val is_D_rs2_E_rd_overlap_in_load = Wire(Bool())
+
   val is_E_rs1_M_rd_overlap = Wire(Bool())
   val is_E_rs2_M_rd_overlap = Wire(Bool())
 
@@ -327,6 +331,9 @@ class Controller(memAddrWidth: Int) extends Module {
 
   val is_D_rs1_W_rd_overlap = Wire(Bool())
   val is_D_rs2_W_rd_overlap = Wire(Bool())
+
+  is_D_rs1_E_rd_overlap_in_load := is_D_use_rs1 && (EXE_opcode === LOAD) && (ID_rs1 === EXE_rd) && (EXE_rd =/= 0.U(5.W))
+  is_D_rs2_E_rd_overlap_in_load := is_D_use_rs2 && (EXE_opcode === LOAD) && (ID_rs2 === EXE_rd) && (EXE_rd =/= 0.U(5.W))
 
   is_E_rs1_M_rd_overlap := is_E_use_rs1 && is_M_use_rd && (EXE_rs1 === MEM_rd) && (MEM_rd =/= 0.U(5.W))
   is_E_rs2_M_rd_overlap := is_E_use_rs2 && is_M_use_rd && (EXE_rs2 === MEM_rd) && (MEM_rd =/= 0.U(5.W))
@@ -340,8 +347,8 @@ class Controller(memAddrWidth: Int) extends Module {
   // WB Hazard (rs2, rs1) - to stage Reg
   io.W_wb_data_hazard := Cat(is_D_rs2_W_rd_overlap,is_D_rs1_W_rd_overlap)
 
-  // Stall -- stall for Data Hazard (stall PC, stage ID, stage EXE. Flush stage MEM to make a Bubble)
-  io.Stall_DH := (is_E_rs1_M_rd_overlap||is_E_rs2_M_rd_overlap) && (MEM_opcode === LOAD) 
+  // Stall -- stall for Data Hazard (stall PC, stage ID. Flush stage EXE to make a Bubble early)
+  io.Stall_DH := (is_D_rs1_E_rd_overlap_in_load||is_D_rs2_E_rd_overlap_in_load) 
 
   // Control signal - Flush
   //-- Flush for Predict_Miss (Flush stage ID, stage EXE, make 2 Bubbles)
