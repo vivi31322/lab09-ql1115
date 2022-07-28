@@ -7,7 +7,7 @@ import aias_lab10.PiplinedCPU._
 import aias_lab10.Memory._
 import aias_lab10.MemIF._
 
-class top_AXILite extends Module {
+/*class top_AXILite extends Module {
     val io = IO(new Bundle{
         val pc = Output(UInt(15.W))
         val regs = Output(Vec(32,UInt(32.W)))
@@ -38,6 +38,7 @@ class top_AXILite extends Module {
     })
 
     val cpu = Module(new PiplinedCPU(15,32))
+    //val bus = Module(new AXILite)
     val im = Module(new InstMem(15))
     val dm = Module(new DataMem(15))
     
@@ -86,10 +87,10 @@ class top_AXILite extends Module {
 
 
 import chisel3.stage.ChiselStage
-object top extends App {
+object top_AXILite extends App {
   (
     new chisel3.stage.ChiselStage).emitVerilog(
-      new top(),
-      Array("-td","generated/top")
+      new top_AXILite(),
+      Array("-td","generated/top_AXILite")
   )
-}
+}*/

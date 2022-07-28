@@ -20,5 +20,6 @@ rv32ui_sc_tests = \
 	sub \
 	xor xori \
 	TestDataHazard \
+	mergesort \
 
 rv32ui__tests = $(addprefix rv32ui-, $(rv32ui_sc_tests))

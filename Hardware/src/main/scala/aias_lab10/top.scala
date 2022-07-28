@@ -34,6 +34,8 @@ class top extends Module {
         val raddr = Output(UInt(32.W))
         val WB_rd = Output(UInt(5.W))
         val WB_wdata = Output(UInt(32.W))
+        val EXE_Jump = Output(Bool())
+        val EXE_Branch = Output(Bool())
 
     })
 
@@ -82,6 +84,8 @@ class top extends Module {
     io.raddr := cpu.io.DataMem.raddr
     io.WB_rd := cpu.io.WB_rd
     io.WB_wdata := cpu.io.WB_wdata
+    io.EXE_Jump := cpu.io.EXE_Jump
+    io.EXE_Branch := cpu.io.EXE_Branch
 }
 
 

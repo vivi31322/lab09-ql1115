@@ -11,6 +11,7 @@ import aias_lab10.PiplinedCPU.Datapath._
 import aias_lab10.PiplinedCPU.pc_sel_map._
 import aias_lab10.PiplinedCPU.wb_sel_map._
 import aias_lab10.PiplinedCPU.forwarding_sel_map._
+import aias_lab10.PiplinedCPU.opcode_map._
 
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     val io = IO(new Bundle{
@@ -40,6 +41,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
         val EXE_alu_out = Output(UInt(32.W))
         val WB_rd = Output(UInt(5.W))
         val WB_wdata = Output(UInt(32.W))
+        val EXE_Jump = Output(Bool())
+        val EXE_Branch = Output(Bool())
     })
     
     //Module
@@ -228,4 +231,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.EXE_src2_sel := ct.io.E_rs2_data_sel
     io.WB_wdata := wb_data_wire
     io.WB_rd := stage_WB.io.inst(11,7)
+    io.EXE_Jump := (stage_EXE.io.inst(6, 0)===JAL) || (stage_EXE.io.inst(6, 0)===JALR)
+    io.EXE_Branch := (stage_EXE.io.inst(6, 0)===BRANCH)
 }

@@ -10,6 +10,15 @@ class topTest(dut:top) extends PeekPokeTester(dut){
 
     val filename = "./src/main/resource/inst.asm"
     val lines = Source.fromFile(filename).getLines.toList
+    
+    var Cycle_Count = 0
+    var Inst_Count = 0
+    var Conditional_Branch_Count = 0
+    var Unconditional_Branch_Count = 0
+    var Conditional_Branch_Hit_Count = 0
+    var Unconditional_Branch_Hit_Count = 0
+    var Stall_Cycle_Count = 0
+    var Flush_Count = 0
 
     while(!peek(dut.io.Hcf)){
         var PC_IF = peek(dut.io.pc).toInt
@@ -18,19 +27,22 @@ class topTest(dut:top) extends PeekPokeTester(dut){
         var PC_MEM = peek(dut.io.MEM_PC).toInt
         var PC_WB = peek(dut.io.WB_PC).toInt
 
-        val E_BT = peek(dut.io.E_Branch_taken).toInt
-        val Flush = peek(dut.io.Flush).toInt
-        val Stall_MA = peek(dut.io.Stall_MA).toInt
-        val Stall_DH = peek(dut.io.Stall_DH).toInt
-        val EXE_src1_sel = peek(dut.io.EXE_src1_sel).toInt
-        val EXE_src2_sel = peek(dut.io.EXE_src2_sel).toInt
-        val alu_out = (peek(dut.io.EXE_alu_out).toInt.toHexString).replace(' ', '0')
-        val EXE_src1 = (peek(dut.io.EXE_src1).toInt.toHexString).replace(' ', '0')
-        val EXE_src2 = (peek(dut.io.EXE_src2).toInt.toHexString).replace(' ', '0')
-        val DM_rdata = (peek(dut.io.rdata).toInt.toHexString).replace(' ', '0')
-        val DM_raddr = (peek(dut.io.raddr).toInt.toHexString).replace(' ', '0')
-        val WB_reg = peek(dut.io.WB_rd).toInt
-        val WB_wdata = (peek(dut.io.WB_wdata).toInt.toHexString).replace(' ', '0')
+        var E_BT = peek(dut.io.E_Branch_taken).toInt
+        var Flush = peek(dut.io.Flush).toInt
+        var Stall_MA = peek(dut.io.Stall_MA).toInt
+        var Stall_DH = peek(dut.io.Stall_DH).toInt
+        var EXE_src1_sel = peek(dut.io.EXE_src1_sel).toInt
+        var EXE_src2_sel = peek(dut.io.EXE_src2_sel).toInt
+        var alu_out = (peek(dut.io.EXE_alu_out).toInt.toHexString).replace(' ', '0')
+        var EXE_src1 = (peek(dut.io.EXE_src1).toInt.toHexString).replace(' ', '0')
+        var EXE_src2 = (peek(dut.io.EXE_src2).toInt.toHexString).replace(' ', '0')
+        var DM_rdata = (peek(dut.io.rdata).toInt.toHexString).replace(' ', '0')
+        var DM_raddr = (peek(dut.io.raddr).toInt.toHexString).replace(' ', '0')
+        var WB_reg = peek(dut.io.WB_rd).toInt
+        var WB_wdata = (peek(dut.io.WB_wdata).toInt.toHexString).replace(' ', '0')
+
+        var EXE_Jump = peek(dut.io.EXE_Jump).toInt
+        var EXE_Branch = peek(dut.io.EXE_Branch).toInt
 
         println(s"[PC_IF ]${"%8d".format(PC_IF)} [Inst] ${"%-25s".format(lines(PC_IF>>2))} ")
         println(s"[PC_ID ]${"%8d".format(PC_ID)} [Inst] ${"%-25s".format(lines(PC_ID>>2))} ")
@@ -44,6 +56,32 @@ class topTest(dut:top) extends PeekPokeTester(dut){
         println(s"[Flush ] ${"%1d".format(Flush)} [Stall_MA ] ${"%1d".format(Stall_MA)} [Stall_DH ] ${"%1d".format(Stall_DH)} "+
                 s"[EXE_src1_sel ] ${"%1d".format(EXE_src1_sel)} [EXE_src2_sel ] ${"%1d".format(EXE_src2_sel)} ")
         println("==============================================")
+
+        // Performance counter
+        Cycle_Count += 1 //Cycle
+        if(Stall_MA==1 || Stall_DH==1){
+            Stall_Cycle_Count += 1 //Stall
+        }else{
+            Inst_Count += 1   // Not Stall, read inst
+
+            if(EXE_Branch==1){
+                Conditional_Branch_Count += 1
+                if(Flush == 0){
+                    Conditional_Branch_Hit_Count += 1
+                }else{
+                    Flush_Count += 1
+                }
+            }
+            if(EXE_Jump==1){
+                Unconditional_Branch_Count += 1
+                if(Flush == 0){
+                    Unconditional_Branch_Hit_Count += 1
+                }else{
+                    Flush_Count += 1
+                }
+            }
+        }
+        
         step(1)
     }
     step(1)
@@ -72,6 +110,18 @@ class topTest(dut:top) extends PeekPokeTester(dut){
                 s"reg[${"%02d".format(8*i+6)}]：${value_6} " +
                 s"reg[${"%02d".format(8*i+7)}]：${value_7} ")
     }
+    // Performance 
+    println("==============================================================")
+    println("Performance Counter:")
+    println(s"[Cycle Count                    ]${"%8d".format(Cycle_Count)}")
+    println(s"[Inst Count                     ]${"%8d".format(Inst_Count)}")
+    println(s"[Conditional Branch Count       ]${"%8d".format(Conditional_Branch_Count)}")
+    println(s"[Unconditional Branch Count     ]${"%8d".format(Unconditional_Branch_Count)}")
+    println(s"[Conditional Branch Hit Count   ]${"%8d".format(Conditional_Branch_Hit_Count)}")
+    println(s"[Unconditional Branch Hit Count ]${"%8d".format(Unconditional_Branch_Hit_Count)}")
+    println(s"[Stall Cycle Count              ]${"%8d".format(Stall_Cycle_Count)}")
+    println(s"[Flush Count                    ]${"%8d".format(Flush_Count)}")
+    println("==============================================================")
 }
 
 object topTest extends App{
