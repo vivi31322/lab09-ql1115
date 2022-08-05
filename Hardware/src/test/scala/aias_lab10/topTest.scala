@@ -110,18 +110,27 @@ class topTest(dut:top) extends PeekPokeTester(dut){
                 s"reg[${"%02d".format(8*i+6)}]：${value_6} " +
                 s"reg[${"%02d".format(8*i+7)}]：${value_7} ")
     }
-    // Performance 
+    // Performance Counter
     println("==============================================================")
     println("Performance Counter:")
-    println(s"[Cycle Count                    ]${"%8d".format(Cycle_Count)}")
-    println(s"[Inst Count                     ]${"%8d".format(Inst_Count)}")
-    println(s"[Conditional Branch Count       ]${"%8d".format(Conditional_Branch_Count)}")
-    println(s"[Unconditional Branch Count     ]${"%8d".format(Unconditional_Branch_Count)}")
-    println(s"[Conditional Branch Hit Count   ]${"%8d".format(Conditional_Branch_Hit_Count)}")
-    println(s"[Unconditional Branch Hit Count ]${"%8d".format(Unconditional_Branch_Hit_Count)}")
-    println(s"[Stall Cycle Count              ]${"%8d".format(Stall_Cycle_Count)}")
-    println(s"[Flush Count                    ]${"%8d".format(Flush_Count)}")
+    println(s"[Cycle Count                    ] ${"%8d".format(Cycle_Count)}")
+    println(s"[Inst Count                     ] ${"%8d".format(Inst_Count)}")
+    println(s"[Conditional Branch Count       ] ${"%8d".format(Conditional_Branch_Count)}")
+    println(s"[Unconditional Branch Count     ] ${"%8d".format(Unconditional_Branch_Count)}")
+    println(s"[Conditional Branch Hit Count   ] ${"%8d".format(Conditional_Branch_Hit_Count)}")
+    println(s"[Unconditional Branch Hit Count ] ${"%8d".format(Unconditional_Branch_Hit_Count)}")
+    println(s"[Stall Cycle Count              ] ${"%8d".format(Stall_Cycle_Count)}")
+    println(s"[Flush Count                    ] ${"%8d".format(Flush_Count)}")
+    
+
+    // Performance Analysis
     println("==============================================================")
+    println("Performance Analysis:")
+    println(s"[CPI                            ] ${"%8f".format(Cycle_Count.toFloat/Inst_Count.toFloat)}")
+    println(s"[Conditional Branch Hit Rate    ] ${"%8f %%".format(Conditional_Branch_Hit_Count.toFloat/Conditional_Branch_Count.toFloat*100)}")
+    println(s"[Unconditional Branch Hit Rate  ] ${"%8f %%".format(Unconditional_Branch_Hit_Count.toFloat/Unconditional_Branch_Count.toFloat*100)}")
+    println("==============================================================")
+    
 }
 
 object topTest extends App{

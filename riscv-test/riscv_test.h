@@ -94,12 +94,12 @@ reset_vector:                                                           \
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        nop;                                                          \
+        nop;                                                            \
 1:      beqz TESTNUM, 1b;                                               \
+        addi a0, TESTNUM, 0;                                            \
         sll TESTNUM, TESTNUM, 1;                                        \
         or TESTNUM, TESTNUM, 1;                                         \
-        li a7, 93;                                                      \
-        addi a0, TESTNUM, 0;                                            \
+        li a7, 93;                                                                                         
 
 //-----------------------------------------------------------------------
 // Data Section Macro
