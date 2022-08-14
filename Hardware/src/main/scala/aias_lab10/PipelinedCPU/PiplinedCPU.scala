@@ -16,10 +16,10 @@ import aias_lab10.PiplinedCPU.opcode_map._
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     val io = IO(new Bundle{
         //InstMem
-        val InstMem = new MemIF_CPU(memAddrWidth) 
+        val InstMem = new MemIF_CPU(memAddrWidth, memDataWidth) 
         
         //DataMem
-        val DataMem = new MemIF_CPU(memAddrWidth) 
+        val DataMem = new MemIF_CPU(memAddrWidth, memDataWidth) 
 
         //System
         val regs = Output(Vec(32,UInt(32.W)))
@@ -81,7 +81,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     // ID stage reg
     stage_ID.io.Flush := ct.io.Flush
     stage_ID.io.Stall := (ct.io.Stall_DH || ct.io.Stall_MA || ct.io.Hcf)
-    stage_ID.io.inst_in := io.InstMem.rdata
+    stage_ID.io.inst_in := io.InstMem.rdata(31,0)
     stage_ID.io.pc_in := pc.io.pc
     stage_ID.io.BP_taken_in := false.B //-- Branch Prediction --
 
@@ -174,7 +174,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     stage_WB.io.pc_plus4_in := (stage_MEM.io.pc + 4.U)
     stage_WB.io.inst_in := stage_MEM.io.inst
     stage_WB.io.alu_out_in := stage_MEM.io.alu_out
-    stage_WB.io.ld_data_in := io.DataMem.rdata
+    stage_WB.io.ld_data_in := io.DataMem.rdata(31,0)
 
     // WB data stage reg
     stage_WB_data.io.Stall := (ct.io.Stall_MA || ct.io.Hcf)
@@ -225,8 +225,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.MEM_PC := stage_MEM.io.pc
     io.WB_PC := Mux(stage_WB.io.pc_plus4 > 0.U ,stage_WB.io.pc_plus4 - 4.U,stage_WB.io.pc_plus4)
     io.EXE_alu_out := alu.io.out
-    io.EXE_src1 := E_rs1_rdata
-    io.EXE_src2 := E_rs2_rdata
+    io.EXE_src1 := alu.io.src1
+    io.EXE_src2 := alu.io.src2
     io.EXE_src1_sel := ct.io.E_rs1_data_sel
     io.EXE_src2_sel := ct.io.E_rs2_data_sel
     io.WB_wdata := wb_data_wire

@@ -54,7 +54,7 @@ class top extends Module {
     im.io.raddr := cpu.io.InstMem.raddr
     
     //Data Memory
-    dm.io.funct3 := cpu.io.DataMem.Length
+    dm.io.Length := cpu.io.DataMem.Length
     dm.io.raddr := cpu.io.DataMem.raddr
     dm.io.wen := cpu.io.DataMem.Mem_W
     dm.io.waddr := cpu.io.DataMem.waddr

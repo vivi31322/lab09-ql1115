@@ -6,16 +6,29 @@ import chisel3.util._
 import aias_lab10.PiplinedCPU._
 import aias_lab10.Memory._
 import aias_lab10.MemIF._
+import aias_lab10.AXI._
 
-/*class top_AXILite extends Module {
+object config {
+  val addr_width = 16
+  val data_width = 32
+  val addr_map = List(("h8000".U, "h10000".U))
+  val data_mem_size = 15 // power of 2 in byte
+  val inst_mem_size = 15 // power of 2 in byte
+  val data_hex_path = "./src/main/resource/data.hex"
+}
+
+import config._
+
+class top_AXI extends Module {
     val io = IO(new Bundle{
-        val pc = Output(UInt(15.W))
-        val regs = Output(Vec(32,UInt(32.W)))
+        val pc = Output(UInt(addr_width.W))
+        val regs = Output(Vec(data_width,UInt(data_width.W)))
         val Hcf = Output(Bool())
 
         //for sure that IM and DM will be synthesized
         val inst = Output(UInt(32.W))
         val rdata = Output(UInt(32.W))
+        val wdata  = Output(UInt(32.W))
 
         // Test
         val E_Branch_taken = Output(Bool())
@@ -34,37 +47,42 @@ import aias_lab10.MemIF._
         val raddr = Output(UInt(32.W))
         val WB_rd = Output(UInt(5.W))
         val WB_wdata = Output(UInt(32.W))
+        val EXE_Jump = Output(Bool())
+        val EXE_Branch = Output(Bool())
+
+        val dm_is_Write = Output(Bool())
+        val dm_is_Read = Output(Bool())
+        val dm_addr = Output(UInt(addr_width.W))
+        var dm_wdata = Output(UInt(data_width.W)) 
+        var dm_rdata = Output(UInt(data_width.W)) 
 
     })
 
-    val cpu = Module(new PiplinedCPU(15,32))
-    //val bus = Module(new AXILite)
-    val im = Module(new InstMem(15))
-    val dm = Module(new DataMem(15))
+    val cpu = Module(new PiplinedCPU(addr_width,64))
+    val bus = Module(new AXIXBar(1, addr_map.length, addr_width, data_width, addr_map))
+    val im = Module(new InstMem(inst_mem_size))
+    val dm = Module(new DataMem_AXI(data_mem_size, addr_width, data_width, "./src/main/resource/data.hex"))
+    val axi_if = Module(new AXI_IF(addr_width,64,data_width))
     
-    // Piplined CPU
+    // Insruction - CPU
     cpu.io.InstMem.rdata := im.io.inst
-    cpu.io.DataMem.rdata := dm.io.rdata 
-
     cpu.io.InstMem.Valid := true.B // Direct to Mem
-    cpu.io.DataMem.Valid := true.B // Direct to Mem
-
-    // Insruction Memory
-    im.io.raddr := cpu.io.InstMem.raddr
+    im.io.raddr := cpu.io.InstMem.raddr(inst_mem_size-1,0)
     
-    //Data Memory
-    dm.io.funct3 := cpu.io.DataMem.Length
-    dm.io.raddr := cpu.io.DataMem.raddr
-    dm.io.wen := cpu.io.DataMem.Mem_W
-    dm.io.waddr := cpu.io.DataMem.waddr
-    dm.io.wdata := cpu.io.DataMem.wdata
+    // CPU - AXI BUS
+    cpu.io.DataMem <> axi_if.io.memIF
+    axi_if.io.bus_master <> bus.io.masters(0)
+
+    // Data Memory - AXI BUS
+    bus.io.slaves(0) <> dm.io.bus_slave
 
     //System
     io.pc := cpu.io.InstMem.raddr // (PC)
     io.regs := cpu.io.regs
     io.Hcf := cpu.io.Hcf
     io.inst := im.io.inst
-    io.rdata := dm.io.rdata
+    io.rdata := cpu.io.DataMem.rdata(data_width-1,0)
+    io.wdata := cpu.io.DataMem.wdata(data_width-1,0)
 
     // Test
     io.E_Branch_taken := cpu.io.E_Branch_taken
@@ -83,14 +101,22 @@ import aias_lab10.MemIF._
     io.raddr := cpu.io.DataMem.raddr
     io.WB_rd := cpu.io.WB_rd
     io.WB_wdata := cpu.io.WB_wdata
+    io.EXE_Jump := cpu.io.EXE_Jump
+    io.EXE_Branch := cpu.io.EXE_Branch
+
+    io.dm_is_Write := dm.io.is_Write
+    io.dm_is_Read := dm.io.is_Read
+    io.dm_addr := dm.io.addr
+    io.dm_wdata := dm.io.wdata
+    io.dm_rdata := dm.io.rdata
 }
 
 
 import chisel3.stage.ChiselStage
-object top_AXILite extends App {
+object top_AXI extends App {
   (
     new chisel3.stage.ChiselStage).emitVerilog(
-      new top_AXILite(),
-      Array("-td","generated/top_AXILite")
+      new top_AXI(),
+      Array("-td","generated/top_AXI")
   )
-}*/
+}

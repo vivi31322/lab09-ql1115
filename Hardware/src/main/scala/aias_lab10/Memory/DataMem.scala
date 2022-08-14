@@ -3,21 +3,11 @@ package aias_lab10.Memory
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFile
-
-
-object wide {
-  val Byte = "b000".U
-  val Half = "b001".U
-  val Word = "b010".U
-  val UByte = "b100".U
-  val UHalf = "b101".U
-}
-
-import wide._
+import aias_lab10.PiplinedCPU.wide._
 
 class DataMem(bits:Int) extends Module {
   val io = IO(new Bundle {
-    val funct3 = Input(UInt(3.W))
+    val Length = Input(UInt(4.W))
     val raddr = Input(UInt(bits.W))
     val rdata = Output(UInt(32.W))
     
@@ -37,13 +27,13 @@ class DataMem(bits:Int) extends Module {
   val wa = WireDefault(0.U(bits.W))
   val wd = WireDefault(0.U(32.W))
 
-  wa := MuxLookup(io.funct3,0.U(bits.W),Seq(
+  wa := MuxLookup(io.Length,0.U(bits.W),Seq(
     Byte -> io.waddr,
     Half -> (io.waddr & ~(1.U(bits.W))),
     Word -> (io.waddr & ~(3.U(bits.W))),
   ))
 
-  wd := MuxLookup(io.funct3,0.U,Seq(
+  wd := MuxLookup(io.Length,0.U,Seq(
     Byte -> io.wdata(7,0),
     Half -> io.wdata(15,0),
     Word -> io.wdata,
@@ -52,19 +42,19 @@ class DataMem(bits:Int) extends Module {
   srdata := 0.S
 
   when(io.wen){
-    when(io.funct3===Byte){
+    when(io.Length===Byte){
       memory(wa) := wd(7,0)
-    }.elsewhen(io.funct3===Half){
+    }.elsewhen(io.Length===Half){
       memory(wa) := wd(7,0)
       memory(wa+1.U(bits.W)) := wd(15,8)
-    }.elsewhen(io.funct3===Word){
+    }.elsewhen(io.Length===Word){
       memory(wa) := wd(7,0)
       memory(wa+1.U(bits.W)) := wd(15,8)
       memory(wa+2.U(bits.W)) := wd(23,16)
       memory(wa+3.U(bits.W)) := wd(31,24)
     }
   }.otherwise{
-    srdata := MuxLookup(io.funct3,0.S,Seq(
+    srdata := MuxLookup(io.Length,0.S,Seq(
       Byte -> memory(io.raddr).asSInt,
       Half -> Cat(memory((io.raddr & (~(1.U(bits.W)))) +1.U),
                   memory(io.raddr & (~(1.U(bits.W))))).asSInt,

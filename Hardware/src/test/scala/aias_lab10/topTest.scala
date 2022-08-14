@@ -17,7 +17,6 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     var Unconditional_Branch_Count = 0
     var Conditional_Branch_Hit_Count = 0
     var Unconditional_Branch_Hit_Count = 0
-    var Stall_Cycle_Count = 0
     var Flush_Count = 0
 
     while(!peek(dut.io.Hcf)){
@@ -59,9 +58,7 @@ class topTest(dut:top) extends PeekPokeTester(dut){
 
         // Performance counter
         Cycle_Count += 1 //Cycle
-        if(Stall_MA==1 || Stall_DH==1){
-            Stall_Cycle_Count += 1 //Stall
-        }else{
+        if(Stall_MA==0 && Stall_DH==0){
             Inst_Count += 1   // Not Stall, read inst
 
             if(EXE_Branch==1){
@@ -119,7 +116,6 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     println(s"[Unconditional Branch Count     ] ${"%8d".format(Unconditional_Branch_Count)}")
     println(s"[Conditional Branch Hit Count   ] ${"%8d".format(Conditional_Branch_Hit_Count)}")
     println(s"[Unconditional Branch Hit Count ] ${"%8d".format(Unconditional_Branch_Hit_Count)}")
-    println(s"[Stall Cycle Count              ] ${"%8d".format(Stall_Cycle_Count)}")
     println(s"[Flush Count                    ] ${"%8d".format(Flush_Count)}")
     
 
@@ -127,8 +123,6 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     println("==============================================================")
     println("Performance Analysis:")
     println(s"[CPI                            ] ${"%8f".format(Cycle_Count.toFloat/Inst_Count.toFloat)}")
-    println(s"[Conditional Branch Hit Rate    ] ${"%8f %%".format(Conditional_Branch_Hit_Count.toFloat/Conditional_Branch_Count.toFloat*100)}")
-    println(s"[Unconditional Branch Hit Rate  ] ${"%8f %%".format(Unconditional_Branch_Hit_Count.toFloat/Unconditional_Branch_Count.toFloat*100)}")
     println("==============================================================")
     
 }

@@ -67,3 +67,11 @@ object forwarding_sel_map {
   val WBD_STAGE = 3.U
 }
 
+object wide {
+  val Byte = "b0000".U
+  val Half = "b0001".U
+  val Word = "b0010".U
+  val UByte = "b0100".U
+  val UHalf = "b0101".U
+  val Vec_8Bytes = "b1000".U
+}

@@ -16,12 +16,12 @@ class Controller(memAddrWidth: Int) extends Module {
     // Memory control signal interface
     val IM_Mem_R = Output(Bool()) 
     val IM_Mem_W = Output(Bool()) 
-    val IM_Length = Output(UInt(3.W))
+    val IM_Length = Output(UInt(4.W))
     val IM_Valid = Input(Bool()) 
 
     val DM_Mem_R = Output(Bool()) 
     val DM_Mem_W = Output(Bool()) 
-    val DM_Length = Output(UInt(3.W))
+    val DM_Length = Output(UInt(4.W))
     val DM_Valid = Input(Bool()) 
 
     // branch Comp.
@@ -236,12 +236,12 @@ class Controller(memAddrWidth: Int) extends Module {
   // Control signal - Data Memory
   io.DM_Mem_R := (DM_to_Read && Mem_state=/=sDM_Done)
   io.DM_Mem_W := (DM_to_Write && Mem_state=/=sDM_Done)
-  io.DM_Length := MEM_funct3 // length
+  io.DM_Length := Cat(0.U(1.W),MEM_funct3) // length
 
   // Control signal - Inst Memory
   io.IM_Mem_R := (true.B && Mem_state=/=sIM_Done) // always true
   io.IM_Mem_W := (false.B && Mem_state=/=sIM_Done) // always false
-  io.IM_Length := "b010".U // always load a word(inst)
+  io.IM_Length := "b0010".U // always load a word(inst)
 
   // Control signal - Scalar Write Back
   val W_reg_en = Wire(Bool())
