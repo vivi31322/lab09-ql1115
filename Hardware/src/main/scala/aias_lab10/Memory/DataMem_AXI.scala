@@ -22,7 +22,7 @@ class DataMem_AXI(size: Int, addrWidth: Int, dataWidth: Int, binaryFile: String)
   val stateReg = RegInit(sIdle)
   val memory = Mem((1 << (size)), UInt(8.W))
   val Rlast = Wire(Bool())
-  Rlast := true.B // 1 transfer
+  Rlast := true.B // 1 transfer (Modify it when more than one transfers in a burst)
   io.bus_slave.readData.bits.last := Rlast
 
   loadMemoryFromFile(memory, binaryFile)

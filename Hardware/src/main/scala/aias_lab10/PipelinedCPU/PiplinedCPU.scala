@@ -24,6 +24,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
         //System
         val regs = Output(Vec(32,UInt(32.W)))
         val Hcf = Output(Bool())
+        /* HW: Modification of Vector Extension */
+        //val vector_regs  = Output(Vec(32,UInt(64.W)))
 
         // Test
         val E_Branch_taken = Output(Bool())
@@ -52,6 +54,9 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     val rf = Module(new RegFile(2))
     val alu = Module(new ALU())
     val bc = Module(new BranchComp())
+    /* HW: Modification of Vector Extension */
+    //val vrf = Module(new Vector_RegFile(2))
+    //val valu = Module(new Vector_ALU())
 
     /*****  Pipeline Stages Registers Module for holding data *****/
     // Instuction Fetch (IF) don't need stage Registers
@@ -214,6 +219,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     //System
     io.regs := rf.io.regs
     io.Hcf := ct.io.Hcf
+    /* HW: Modification of Vector Extension */
+    //io.vector_regs := vrf.io.vector_regs
 
     // Test 
     io.E_Branch_taken := ct.io.E_Branch_taken

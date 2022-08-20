@@ -25,6 +25,9 @@ class top_AXI extends Module {
         val regs = Output(Vec(data_width,UInt(data_width.W)))
         val Hcf = Output(Bool())
 
+        /* HW: Modification of Vector Extension */
+        //val vector_regs  = Output(Vec(32,UInt(64.W)))
+
         //for sure that IM and DM will be synthesized
         val inst = Output(UInt(32.W))
         val rdata = Output(UInt(32.W))
@@ -83,6 +86,8 @@ class top_AXI extends Module {
     io.inst := im.io.inst
     io.rdata := cpu.io.DataMem.rdata(data_width-1,0)
     io.wdata := cpu.io.DataMem.wdata(data_width-1,0)
+    /* HW: Modification of Vector Extension */
+    //io.vector_regs := cpu.io.vector_regs
 
     // Test
     io.E_Branch_taken := cpu.io.E_Branch_taken

@@ -11,6 +11,7 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
     val filename = "./src/main/resource/inst.asm"
     val lines = Source.fromFile(filename).getLines.toList
 
+    // Counter
     var Cycle_Count = 0
     var Inst_Count = 0
     var Conditional_Branch_Count = 0
@@ -18,6 +19,7 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
     var Conditional_Branch_Hit_Count = 0
     var Unconditional_Branch_Hit_Count = 0
     var Flush_Count = 0
+    /* HW: Add more counter */
 
     while(!peek(dut.io.Hcf)){
         var PC_IF = peek(dut.io.pc).toInt
@@ -50,7 +52,7 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
         val dm_wdata = (peek(dut.io.dm_wdata).toInt.toHexString).replace(' ', '0')
         val dm_rdata = (peek(dut.io.dm_rdata).toInt.toHexString).replace(' ', '0')
 
-
+        // step info
         println(s"[PC_IF ]${"%8d".format(PC_IF)} [Inst] ${"%-25s".format(lines(PC_IF>>2))} ")
         println(s"[PC_ID ]${"%8d".format(PC_ID)} [Inst] ${"%-25s".format(lines(PC_ID>>2))} ")
         println(s"[PC_EXE]${"%8d".format(PC_EXE)} [Inst] ${"%-25s".format(lines(PC_EXE>>2))} "+ 
@@ -67,6 +69,7 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
         println("==============================================")
 
         // Performance counter
+        /* HW: Add more counter */
         Cycle_Count += 1 //Cycle
         if(Stall_MA==0 && Stall_DH==0){
             Inst_Count += 1   // Not Stall, read inst
@@ -118,6 +121,24 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
                 s"reg[${"%02d".format(8*i+7)}]：${value_7} ")
     }
 
+    /* HW: Modification of Vector Extension */
+    /*
+    println("")
+    println("Value in the Vector RegFile")
+    for(i <- 0 until 8){
+        var value_0 = String.format("%" + 16 + "s", peek(dut.io.vector_regs(4*i+0)).toString(16)).replace(' ', '0')
+        var value_1 = String.format("%" + 16 + "s", peek(dut.io.vector_regs(4*i+1)).toString(16)).replace(' ', '0')
+        var value_2 = String.format("%" + 16 + "s", peek(dut.io.vector_regs(4*i+2)).toString(16)).replace(' ', '0')
+        var value_3 = String.format("%" + 16 + "s", peek(dut.io.vector_regs(4*i+3)).toString(16)).replace(' ', '0')
+
+        println(s"vector_reg[${"%02d".format(4*i+0)}]：${value_0} " +
+                s"vector_reg[${"%02d".format(4*i+1)}]：${value_1} " +
+                s"vector_reg[${"%02d".format(4*i+2)}]：${value_2} " +
+                s"vector_reg[${"%02d".format(4*i+3)}]：${value_3} ")
+    }
+    */
+
+
     // Performance Counter
     println("==============================================================")
     println("Performance Counter:")
@@ -128,13 +149,14 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
     println(s"[Conditional Branch Hit Count   ] ${"%8d".format(Conditional_Branch_Hit_Count)}")
     println(s"[Unconditional Branch Hit Count ] ${"%8d".format(Unconditional_Branch_Hit_Count)}")
     println(s"[Flush Count                    ] ${"%8d".format(Flush_Count)}")
-    
+    /* HW: Add more counter */
 
     // Performance Analysis
     println("==============================================================")
     println("Performance Analysis:")
     println(s"[CPI                            ] ${"%8f".format(Cycle_Count.toFloat/Inst_Count.toFloat)}")
     println("==============================================================")
+    /* HW: Add more Analysis */
 }
 
 object topTest_AXI extends App{
