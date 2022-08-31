@@ -93,6 +93,7 @@ lw s9, 28(sp)
 lw s10, 32(sp)
 addi sp, sp, 36
 jalr x0, x1, x0
+hcf
 nop
 nop
 nop

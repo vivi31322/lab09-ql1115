@@ -61,11 +61,11 @@ class top_AXI extends Module {
 
     })
 
-    val cpu = Module(new PiplinedCPU(addr_width,64))
+    val cpu = Module(new PiplinedCPU(addr_width,64)) // Modify 64 to 512 when using Vector Extension
     val bus = Module(new AXIXBar(1, addr_map.length, addr_width, data_width, addr_map))
     val im = Module(new InstMem(inst_mem_size))
     val dm = Module(new DataMem_AXI(data_mem_size, addr_width, data_width, "./src/main/resource/data.hex"))
-    val axi_if = Module(new AXI_IF(addr_width,64,data_width))
+    val axi_if = Module(new AXI_IF(addr_width,64,data_width)) // Modify 64 to 512 when using Vector Extension
     
     // Insruction - CPU
     cpu.io.InstMem.rdata := im.io.inst

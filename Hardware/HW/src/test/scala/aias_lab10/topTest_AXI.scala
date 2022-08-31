@@ -155,8 +155,8 @@ class topTest_AXI(dut:top_AXI) extends PeekPokeTester(dut){
     println("==============================================================")
     println("Performance Analysis:")
     println(s"[CPI                            ] ${"%8f".format(Cycle_Count.toFloat/Inst_Count.toFloat)}")
-    println("==============================================================")
     /* HW: Add more Analysis */
+    println("==============================================================")
 }
 
 object topTest_AXI extends App{
