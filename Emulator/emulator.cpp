@@ -311,6 +311,7 @@ uint32_t label_addr(char* label , label_loc* labels, int label_count, int orig_l
 		if (streq(labels[i].label, label)) return labels[i].loc;
 	}
 	print_syntax_error(orig_line, "Undefined label" );
+	return 1;
 }
 
 
