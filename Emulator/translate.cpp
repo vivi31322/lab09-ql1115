@@ -66,7 +66,7 @@ void translate_to_machine_code(uint8_t* mem,instr* imem, char* argv1){
 	char* path;
 	copy_path(argv1, &path);
 
-	FILE *mch_file = fopen(concat(path,"m_code.hex"), "w");
+	FILE *mch_file = fopen(concat(path,"inst.hex"), "w");
 	FILE *inst_file = fopen(concat(path,"inst.asm"), "w");
 	FILE *data_file = fopen(concat(path,"data.hex"), "w");
 
