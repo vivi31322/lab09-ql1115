@@ -59,13 +59,21 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     //val valu = Module(new Vector_ALU())
 
     /*****  Pipeline Stages Registers Module for holding data *****/
-    // Instuction Fetch (IF) don't need stage Registers
+    // stage Registers
+    val stage_IF = Module (new Reg_IF(InstAddrWidth))
     val stage_ID = Module(new Reg_ID(memAddrWidth))
     val stage_EXE = Module(new Reg_EXE(memAddrWidth))
     val stage_MEM = Module(new Reg_MEM(memAddrWidth))
     val stage_WB = Module(new Reg_WB(memAddrWidth))
-    val stage_WB_data = Module(new Reg_WB_data())
 
+    // 5 pipe stage datapath modules
+    
+
+    // 1 contorller module
+
+
+
+    
     //PC
     val EXE_target_pc = alu.io.out(memAddrWidth-1,0)
     pc.io.Stall := (ct.io.Stall_DH || ct.io.Stall_MA)
