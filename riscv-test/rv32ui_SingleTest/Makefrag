@@ -17,6 +17,7 @@ rv32ui_SingleTest_sc_tests = \
 	sra srai \
 	srl srli \
 	sub \
-	xor xori
+	xor xori \
+	TestALL TestDataHazard 
 
 rv32ui_SingleTest__tests = $(addprefix rv32ui_SingleTest-, $(rv32ui_SingleTest_sc_tests))

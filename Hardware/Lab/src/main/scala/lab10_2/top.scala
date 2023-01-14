@@ -1,9 +1,9 @@
-package lab10_1
+package lab10_2
 
 import chisel3._
 import chisel3.util._
 
-import lab10_1.PiplinedCPU._
+import lab10_2.PiplinedCPU._
 import lab10_1.Memory._
 import lab10_1.MemIF._
 

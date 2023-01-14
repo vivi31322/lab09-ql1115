@@ -1,4 +1,4 @@
-package lab10_1
+package lab10_2
 
 import scala.io.Source
 import chisel3.iotesters.{PeekPokeTester,Driver}

@@ -16,7 +16,7 @@ RVTEST_RV32U
 #-------------------------------------------------------------
 lui x1, 0x00000008
 TEST_INSERT_NOPS_5
-lh x2, 4(x1)
+lw x2, 4(x1)
 
 RVTEST_CODE_END
 

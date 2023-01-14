@@ -1,4 +1,4 @@
-package lab10_1.PiplinedCPU.Controller
+package lab10_2.PiplinedCPU.Controller
 
 import chisel3._
 import chisel3.util._
@@ -66,6 +66,8 @@ class Controller(memAddrWidth: Int) extends Module {
   })
   // Inst Decode for each stage 
   val IF_opcode = io.IF_Inst(6, 0)
+  val IF_rs1 = io.IF_Inst(19,15)     //  lab10_2
+  val IF_rs2 = io.IF_Inst(24,20)     //  lab10_2
 
   val ID_opcode = io.ID_Inst(6, 0)
 
@@ -75,8 +77,10 @@ class Controller(memAddrWidth: Int) extends Module {
 
   val MEM_opcode = io.MEM_Inst(6, 0)
   val MEM_funct3 = io.MEM_Inst(14, 12)
+  val MEM_rd = io.MEM_Inst(11, 7)      //  lab10_2
 
   val WB_opcode = io.WB_Inst(6, 0)
+
 
   // Control signal - Branch/Jump
   val E_En = Wire(Bool())
@@ -155,21 +159,38 @@ class Controller(memAddrWidth: Int) extends Module {
   io.Hcf := (IF_opcode === HCF)
 
   /****************** Data Hazard ******************/
+  // Use rs in IF stage 
+  val is_F_use_rs1 = Wire(Bool()) 
+  val is_F_use_rs2 = Wire(Bool())
+  is_F_use_rs1 := MuxLookup(IF_opcode,false.B,Seq(
+    BRANCH -> true.B,
+  ))   // To Be Modified
+  is_F_use_rs2 := MuxLookup(IF_opcode,false.B,Seq(
+    BRANCH -> true.B,
+  ))   // To Be Modified
 
-  // Use rs in ID stage 
+  // Use rd in ID stage 
 
-  // Use rs in EXE stage 
+  // Use rd in EXE stage
 
-  // Use rd in MEM stage 
-
-  // Use rd in WB stage 
+  // Use rd in MEM stage
+  val is_M_use_rd = Wire(Bool())
+  is_M_use_rd := MuxLookup(MEM_opcode,false.B,Seq(
+    OP_IMM -> true.B,
+  ))   // To Be Modified
 
   // Hazard condition (rd, rs overlap)
+  val is_F_rs1_M_rd_overlap = Wire(Bool())
+  val is_F_rs2_M_rd_overlap = Wire(Bool())
+
+  is_F_rs1_M_rd_overlap := is_F_use_rs1 && is_M_use_rd && (IF_rs1 === MEM_rd) && (MEM_rd =/= 0.U(5.W))
+  is_F_rs2_M_rd_overlap := is_F_use_rs2 && is_M_use_rd && (IF_rs2 === MEM_rd) && (MEM_rd =/= 0.U(5.W))
  
   // WB Hazard (rs2, rs1) - to stage Reg
 
   // Control signal - Stall
-  io.Stall_DH := false.B // Stall for Data Hazard
+  // Stall for Data Hazard
+  io.Stall_DH := (is_F_rs1_M_rd_overlap || is_F_rs2_M_rd_overlap)
   io.Stall_MA := false.B // Stall for Waiting Memory Access
   // Control signal - Flush
   io.Flush := Predict_Miss
@@ -177,6 +198,4 @@ class Controller(memAddrWidth: Int) extends Module {
   // Control signal - Data Forwarding (Bonus)
 
   /****************** Data Hazard End******************/
-
-  
 }

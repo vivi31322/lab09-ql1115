@@ -11,121 +11,122 @@
 #include "test_macros.h"
 
 RVTEST_RV32U
-RVTEST_CODE_BEGIN
 
   #-------------------------------------------------------------
-  # EXE rs - MEM rd Data Hazard tests - Data forwarding
+  # IF rs - MEM rd Data Hazard tests
   #-------------------------------------------------------------
-
 ## rs1 - rd
+test1:
+  addi gp, x0, 1
+  addi t1, x0, 1
+  TEST_INSERT_NOPS_5
+  addi t2, x0, 1
+  TEST_INSERT_NOPS_2
+  beq t2, t1, test2
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
+
+## rs2 - rd
 test2:
-  li TESTNUM, 2
-  li t1, 2
+  addi gp, x0, 2
+  addi t1, x0, 2
   TEST_INSERT_NOPS_5
-  li t2, 2
-  add t3,t2,t1
-  addi t3,t3,-4
-  bne  t3,x0, fail
-
-## rs2 - rd
-test3:
-  li TESTNUM, 3
-  li t1, 3
+  addi t2, x0, 2
+  TEST_INSERT_NOPS_2
+  beq t1, t2, test3
   TEST_INSERT_NOPS_5
-  li t2, 3
-  add t3,t1,t2
-  addi t3,t3,-6
-  bne  t3,x0, fail
-
-  #-------------------------------------------------------------
-  # EXE rs - WB rd Data Hazard tests - Data forwarding
-  #-------------------------------------------------------------
-## rs1 - rd
-test4:
-  li TESTNUM, 4
-  li t1, 4
-  TEST_INSERT_NOPS_5
-  li t2, 4
-  TEST_INSERT_NOPS_1
-  add t3,t2,t1
-  addi t3,t3,-8
-  bne  t3,x0, fail
-
-## rs2 - rd
-test5:
-  li TESTNUM, 5
-  li t1, 5
-  TEST_INSERT_NOPS_5
-  li t2, 5
-  TEST_INSERT_NOPS_1
-  add t3,t1,t2
-  addi t3,t3,-10
-  bne  t3,x0, fail
+  beq x0, x0, fail
   
   #-------------------------------------------------------------
-  # ID rs - WB rd Data Hazard tests - Data forwarding
+  # IF rs - EXE rd Data Hazard tests
   #-------------------------------------------------------------
 ## rs1 - rd
+test3:
+  addi gp, x0, 3
+  addi t1, x0, 3
+  TEST_INSERT_NOPS_5
+  addi t2, x0, 3
+  TEST_INSERT_NOPS_1
+  beq t2, t1, test4
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
+
+## rs2 - rd
+test4:
+  addi gp, x0, 4
+  addi t1, x0, 4
+  TEST_INSERT_NOPS_5
+  addi t2, x0, 4
+  TEST_INSERT_NOPS_1
+  beq t1, t2, test5
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
+
+  #-------------------------------------------------------------
+  # IF rs - ID rd Data Hazard tests
+  #-------------------------------------------------------------
+## rs1 - rd
+test5:
+  addi gp, x0, 5
+  addi t1, x0, 5
+  TEST_INSERT_NOPS_5
+  addi t2, x0, 5
+  beq t2, t1, test6
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
+
+## rs2 - rd
 test6:
-  li TESTNUM, 6
-  li t1, 6
+  addi gp, x0, 6
+  addi t1, x0, 6
   TEST_INSERT_NOPS_5
-  li t2, 6
-  TEST_INSERT_NOPS_2
-  add t3,t2,t1
-  addi t3,t3,-12
-  bne  t3,x0, fail
-
-## rs2 - rd
-test7:
-  li TESTNUM, 7
-  li t1, 7
+  addi t2, x0, 6
+  beq t1, t2, test7
   TEST_INSERT_NOPS_5
-  li t2, 7
-  TEST_INSERT_NOPS_2
-  add t3,t1,t2
-  addi t3,t3,-14
-  bne  t3,x0, fail
+  beq x0, x0, fail
 
   #-------------------------------------------------------------
-  # EXE rs - MEM rd (Memory Access) Data Hazard tests - Stall
+  # IF rs - ID rd (Memory Access) Data Hazard tests
   #-------------------------------------------------------------
 ## rs1 - rd
-test8:
-  li TESTNUM, 8
+test7:
+  addi gp, x0, 7
   la t1, tdata1
-  li t2, 255
+  addi t2, x0, 255
   TEST_INSERT_NOPS_5
   lbu t3, 0(t1)
-  sub t3,t3,t2
-  bne t3,x0, fail
+  beq t3, t2, test8
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
 
 ## rs2 - rd
-test9:
-  li TESTNUM, 9
+test8:
+  addi gp, x0, 8
   la t1, tdata3
-  li t2, 15
+  addi t2, x0, 15
   TEST_INSERT_NOPS_5
   lbu t3, 0(t1)
-  sub t3,t2,t3
-  bne  t3,x0, fail
+  beq t3, t2, test9
+  TEST_INSERT_NOPS_5
+  beq x0, x0, fail
 
   #-------------------------------------------------------------
   # All Test
   #-------------------------------------------------------------
 
-test10:
-  li TESTNUM, 10
-  li t3 ,1
+test9:
+  addi gp, x0, 9
+  addi t3, x0, 1
   la t1, tdata1
   lb t2, 0(t1)
   add t3,t2,t3
   add t3,t3,t2
   sub t3,t2,t3
-  bne  t3,x0, fail
+  beq  t3,x0, test10
+  beq  x0,x0, fail
 
-test11:
-  li TESTNUM, 11
+test10:
+  addi gp, x0, 10
   la t3, tdata5
   la t1, tdata1
   sw t1, 0(t3)
@@ -133,10 +134,16 @@ test11:
   lw t2, 0(t2)
   lb t2,0(t2)
   lb t1,0(t1)
-  bne t2,t1,fail
-
-  TEST_PASSFAIL
-
+  beq  t3,x0, pass
+  beq  x0,x0, fail
+pass:
+  addi sp, x0, 0
+  beq x0, x0, exit
+fail:
+  TEST_INSERT_NOPS_5
+  addi sp, gp, 0
+exit:  
+   
 RVTEST_CODE_END
 
   .data

@@ -1,4 +1,4 @@
-package lab10_1.PiplinedCPU
+package lab10_2.PiplinedCPU
 
 import chisel3._
 import chisel3.util._
@@ -6,7 +6,7 @@ import chisel3.util._
 import lab10_1.Memory._
 import lab10_1.MemIF._
 import lab10_1.PiplinedCPU.StageRegister._
-import lab10_1.PiplinedCPU.Controller._
+import lab10_2.PiplinedCPU.Controller._        // use lab10_2 controller
 import lab10_1.PiplinedCPU.DatapathModule._
 import lab10_1.PiplinedCPU.DatapathModule.DatapathComponent._
 import lab10_1.PiplinedCPU.opcode_map._
@@ -63,7 +63,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     /* Wire Connect */
     // === IF stage reg (PC reg) ======================================================
-    stage_IF.io.Stall := contorller.io.Hcf        // To Be Modified
+    stage_IF.io.Stall := (contorller.io.Hcf||contorller.io.Stall_DH) // To Be Modified
     stage_IF.io.next_pc_in := datapath_IF.io.next_pc
 
     // IF Block Datapath
@@ -85,7 +85,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     // === ID stage reg ==============================================================
     stage_ID.io.Flush := contorller.io.Flush    // To Be Modified
-    stage_ID.io.Stall := contorller.io.Hcf      // To Be Modified
+    stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_DH)      // To Be Modified
     stage_ID.io.inst_in := datapath_IF.io.inst
     stage_ID.io.pc_in := stage_IF.io.pc
     stage_ID.io.BP_taken_in := datapath_IF.io.BP_taken     //-- Branch Prediction --

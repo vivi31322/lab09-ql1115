@@ -26,6 +26,8 @@ class Path_EXE(addrWidth:Int) extends Module {
         // Test
         val alu_src1 = Output(UInt(32.W))
         val alu_src2 = Output(UInt(32.W))
+        val EXE_src1 = Output(UInt(32.W))
+        val EXE_src2 = Output(UInt(32.W))
     })
     val alu_src1 = Wire(UInt(32.W))
     val alu_src2 = Wire(UInt(32.W))
@@ -59,5 +61,7 @@ class Path_EXE(addrWidth:Int) extends Module {
     io.EXE_target_pc_out := alu.io.out(addrWidth-1,0) // pc target from alu out
     io.alu_src1 := alu_src1
     io.alu_src2 := alu_src2
+    io.EXE_src1 := io.EXE_rs1_rdata_in
+    io.EXE_src2 := io.EXE_rs2_rdata_in
 
 }
