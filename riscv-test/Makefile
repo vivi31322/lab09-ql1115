@@ -1,18 +1,19 @@
 #=======================================================================
 # Makefile for riscv-tests/isa
 #-----------------------------------------------------------------------
-XLEN    := 32
+XLEN := 32
 
 # ----------------------------------------------------------------------
 
-XLEN ?= 64
+#XLEN ?= 64
 
 src_dir := .
 
-ifeq ($(XLEN),64)
-include $(src_dir)/rv64ui/Makefrag
-endif
-include $(src_dir)/rv32ui/Makefrag
+#ifeq ($(XLEN),64)
+#include $(src_dir)/rv64ui/Makefrag
+#endif
+include $(src_dir)/rv32ui_FullTest/Makefrag
+include $(src_dir)/rv32ui_SingleTest/Makefrag
 
 
 default: all
@@ -88,10 +89,11 @@ endif
 
 endef
 
-$(eval $(call compile_template,rv32ui,-march=rv32g -mabi=ilp32))
-ifeq ($(XLEN),64)
-$(eval $(call compile_template,rv64ui,-march=rv64g -mabi=lp64))
-endif
+#$(eval $(call compile_template,rv32ui_FullTest,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32ui_SingleTest,-march=rv32g -mabi=ilp32))
+#ifeq ($(XLEN),64)
+#$(eval $(call compile_template,rv64ui,-march=rv64g -mabi=lp64))
+#endif
 
 tests_dump = $(addsuffix .dump, $(tests))
 tests_hex = $(addsuffix .hex, $(tests))
