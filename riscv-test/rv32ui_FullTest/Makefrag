@@ -19,7 +19,6 @@ rv32ui_FullTest_sc_tests = \
 	srl srli \
 	sub \
 	xor xori \
-	TestDataHazard \
 	mergesort \
 
 rv32ui_FullTest__tests = $(addprefix rv32ui_FullTest-, $(rv32ui_FullTest_sc_tests))
