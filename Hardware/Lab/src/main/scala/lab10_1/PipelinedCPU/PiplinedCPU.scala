@@ -3,12 +3,10 @@ package lab10_1.PiplinedCPU
 import chisel3._
 import chisel3.util._
 
-import lab10_1.Memory._
 import lab10_1.MemIF._
 import lab10_1.PiplinedCPU.StageRegister._
 import lab10_1.PiplinedCPU.Controller._
 import lab10_1.PiplinedCPU.DatapathModule._
-import lab10_1.PiplinedCPU.DatapathModule.DatapathComponent._
 import lab10_1.PiplinedCPU.opcode_map._
 
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {

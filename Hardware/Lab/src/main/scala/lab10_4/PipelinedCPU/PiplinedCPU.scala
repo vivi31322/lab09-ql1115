@@ -1,13 +1,13 @@
-package lab10_2.PiplinedCPU
+package lab10_4.PiplinedCPU
 
 import chisel3._
 import chisel3.util._
 
-import lab10_1.Memory._
-import lab10_1.MemIF._
-import lab10_1.PiplinedCPU.StageRegister._
-import lab10_2.PiplinedCPU.Controller._        // use lab10_2 controller
-import lab10_1.PiplinedCPU.DatapathModule._
+import lab10_1.MemIF._                        
+import lab10_4.MemIF._                         // AXI interface
+import lab10_4.PiplinedCPU.StageRegister._     // AXI interface
+import lab10_4.PiplinedCPU.Controller._        // use lab10_4 controller
+import lab10_4.PiplinedCPU.DatapathModule._
 import lab10_1.PiplinedCPU.opcode_map._
 
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
