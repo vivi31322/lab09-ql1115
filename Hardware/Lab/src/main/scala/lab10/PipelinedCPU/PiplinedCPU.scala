@@ -72,8 +72,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_IF.io.EXE_pc_in := stage_EXE.io.pc
     datapath_IF.io.EXE_target_pc_in := datapath_EXE.io.EXE_target_pc_out 
     datapath_IF.io.Mem_data := io.InstMem.rdata(31,0)
-    datapath_IF.io.E_En := contorller.io.E_En                     //-- Branch Prediction --
-    datapath_IF.io.E_Branch_taken := contorller.io.E_Branch_taken //-- Branch Prediction --
 
     // --- Insruction Memory Interface
     io.InstMem.Mem_R := contorller.io.IM_Mem_R
@@ -88,7 +86,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_DH)      // To Be Modified
     stage_ID.io.inst_in := datapath_IF.io.inst
     stage_ID.io.pc_in := stage_IF.io.pc
-    stage_ID.io.BP_taken_in := datapath_IF.io.BP_taken     //-- Branch Prediction --
 
     // ID Block Datapath
     datapath_ID.io.ID_inst_in := stage_ID.io.inst
@@ -98,14 +95,13 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_ID.io.ImmSel := contorller.io.D_ImmSel
 
     // === EXE stage reg ==============================================================
-    stage_EXE.io.Flush := contorller.io.Flush // To Be Modified
+    stage_EXE.io.Flush := (contorller.io.Flush||contorller.io.Stall_DH) // To Be Modified
     stage_EXE.io.Stall := contorller.io.Hcf   // To Be Modified
     stage_EXE.io.pc_in := stage_ID.io.pc
     stage_EXE.io.inst_in := stage_ID.io.inst
     stage_EXE.io.imm_in := datapath_ID.io.imm
     stage_EXE.io.rs1_rdata_in := datapath_ID.io.ID_rs1_rdata
     stage_EXE.io.rs2_rdata_in := datapath_ID.io.ID_rs2_rdata
-    stage_EXE.io.BP_taken_in := stage_ID.io.BP_taken          //-- Branch Prediction --
 
     // EXE Block Datapath
     datapath_EXE.io.EXE_pc_in := stage_EXE.io.pc
@@ -162,8 +158,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     contorller.io.E_BrLT := datapath_EXE.io.E_BrLT
 
     contorller.io.ID_pc := stage_ID.io.pc
-    contorller.io.EXE_BP_taken := stage_EXE.io.BP_taken
-    contorller.io.BP_taken := datapath_IF.io.BP_taken
     
     contorller.io.EXE_target_pc := datapath_EXE.io.EXE_target_pc_out
 
