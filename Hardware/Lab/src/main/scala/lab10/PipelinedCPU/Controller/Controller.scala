@@ -29,12 +29,10 @@ class Controller(memAddrWidth: Int) extends Module {
     val E_BrLT = Input(Bool())
 
     // Branch Prediction
-    val BP_taken = Input(Bool())
     val E_Branch_taken = Output(Bool())
     val E_En = Output(Bool())
 
     val ID_pc = Input(UInt(memAddrWidth.W))
-    val EXE_BP_taken = Input(Bool())
     val EXE_target_pc = Input(UInt(memAddrWidth.W))
 
     // Flush
@@ -93,18 +91,14 @@ class Controller(memAddrWidth: Int) extends Module {
 
   // pc predict miss signal
   val Predict_Miss = Wire(Bool())
-  Predict_Miss := (E_En && ((io.EXE_BP_taken =/= E_Branch_taken) || (E_Branch_taken && io.ID_pc=/=io.EXE_target_pc)))
-  
-  // Control signal - Branch Prediction (Lab12)
-  val BP_En = Wire(Bool()) // Branch Predict Enable
-  BP_En := (IF_opcode===BRANCH)    // To Be Modified
+  Predict_Miss := (E_En && E_Branch_taken && io.ID_pc=/=io.EXE_target_pc)
 
   // Control signal - PC
   when(Predict_Miss){
     io.PCSel := EXE_T_PC
   }.otherwise{
     io.PCSel := IF_PC_PLUS_4
-  }   // (To Be Modified in Lab12)
+  }
 
   // Control signal - Branch comparator
   io.E_BrUn := (io.EXE_Inst(13) === 1.U)
@@ -156,23 +150,11 @@ class Controller(memAddrWidth: Int) extends Module {
 
   /****************** Data Hazard ******************/
 
-  // Use rs in ID stage 
-
-  // Use rs in EXE stage 
-
-  // Use rd in MEM stage 
-
-  // Use rd in WB stage 
-
-  // Hazard condition (rd, rs overlap)
- 
-  // WB Hazard (rs2, rs1) - to stage Reg
-
   // Control signal - Stall
   io.Stall_DH := false.B // Stall for Data Hazard
   io.Stall_MA := false.B // Stall for Waiting Memory Access
   // Control signal - Flush
-  io.Flush := Predict_Miss
+  io.Flush := false.B
 
   // Control signal - Data Forwarding (Bonus)
 
