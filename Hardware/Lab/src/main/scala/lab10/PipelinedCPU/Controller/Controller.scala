@@ -36,11 +36,12 @@ class Controller(memAddrWidth: Int) extends Module {
     val EXE_target_pc = Input(UInt(memAddrWidth.W))
 
     // Flush
-    val Flush = Output(Bool()) //TBD
+    val Flush_WB_ID_DH = Output(Bool()) //TBD
+    val Flush_BH = Output(Bool()) //TBD
 
     // Stall
     // To Be Modified
-    val Stall_DH = Output(Bool()) //TBD
+    val Stall_WB_ID_DH = Output(Bool()) //TBD
     val Stall_MA = Output(Bool()) //TBD
 
     // inst
@@ -151,10 +152,11 @@ class Controller(memAddrWidth: Int) extends Module {
   /****************** Data Hazard ******************/
 
   // Control signal - Stall
-  io.Stall_DH := false.B // Stall for Data Hazard
+  io.Stall_WB_ID_DH := false.B // Stall for Data Hazard
   io.Stall_MA := false.B // Stall for Waiting Memory Access
   // Control signal - Flush
-  io.Flush := false.B
+  io.Flush_WB_ID_DH := false.B
+  io.Flush_BH := false.B
 
   // Control signal - Data Forwarding (Bonus)
 
