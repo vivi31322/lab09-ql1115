@@ -63,7 +63,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     /* Wire Connect */
     // === IF stage reg (PC reg) ======================================================
-    stage_IF.io.Stall := (contorller.io.Hcf||contorller.io.Stall_DH) // To Be Modified
+    stage_IF.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH) // To Be Modified
     stage_IF.io.next_pc_in := datapath_IF.io.next_pc
 
     // IF Block Datapath
@@ -82,8 +82,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     io.InstMem.wdata := 0.U // not used
 
     // === ID stage reg ==============================================================
-    stage_ID.io.Flush := contorller.io.Flush    // To Be Modified
-    stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_DH)      // To Be Modified
+    stage_ID.io.Flush := contorller.io.Flush_BH    // To Be Modified
+    stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH)      // To Be Modified
     stage_ID.io.inst_in := datapath_IF.io.inst
     stage_ID.io.pc_in := stage_IF.io.pc
 
@@ -95,7 +95,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_ID.io.ImmSel := contorller.io.D_ImmSel
 
     // === EXE stage reg ==============================================================
-    stage_EXE.io.Flush := (contorller.io.Flush||contorller.io.Stall_DH) // To Be Modified
+    stage_EXE.io.Flush := (contorller.io.Flush_BH||contorller.io.Stall_WB_ID_DH) // To Be Modified
     stage_EXE.io.Stall := contorller.io.Hcf   // To Be Modified
     stage_EXE.io.pc_in := stage_ID.io.pc
     stage_EXE.io.inst_in := stage_ID.io.inst
