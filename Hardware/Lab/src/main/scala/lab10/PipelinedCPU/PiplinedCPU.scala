@@ -95,7 +95,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_ID.io.ImmSel := contorller.io.D_ImmSel
 
     // === EXE stage reg ==============================================================
-    stage_EXE.io.Flush := (contorller.io.Flush_BH||contorller.io.Stall_WB_ID_DH) // To Be Modified
+    stage_EXE.io.Flush := (contorller.io.Flush_BH||contorller.io.Flush_WB_ID_DH) // To Be Modified
     stage_EXE.io.Stall := contorller.io.Hcf   // To Be Modified
     stage_EXE.io.pc_in := stage_ID.io.pc
     stage_EXE.io.inst_in := stage_ID.io.inst
