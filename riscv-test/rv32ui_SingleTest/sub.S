@@ -17,7 +17,7 @@ RVTEST_RV32U
 addi x1, x0, 0x00000123
 addi x2, x0, 0x00000124
 TEST_INSERT_NOPS_5
-add x3, x1, x2
+sub x3, x1, x2
 
 RVTEST_CODE_END
 

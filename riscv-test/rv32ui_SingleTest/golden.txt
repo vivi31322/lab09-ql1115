@@ -27,9 +27,9 @@ slli    x1 = 0x000007ff, x3 = 0x00007ff0
 slt     x1 = 0xfffffff0, x2 = 0x00000010, x3 = 0x00000001
 slti    x1 = 0xfffffff0, x3 = 0x00000001
 sltiu   x1 = 0x00000010, x3 = 0x00000001
-sltu    x1 = 0x00000010, x2 = 0xfffffff0, x3 = 0x000007ff
+sltu    x1 = 0x00000010, x2 = 0xfffffff0, x3 = 0x00000001
 sra     x1 = 0xffffff12, x2 = 0x00000004, x3 = 0xfffffff1
-srai    x1 = 0xffffffff, x3 = 0xfffffff1
+srai    x1 = 0xffffff12, x3 = 0xfffffff1
 srl     x1 = 0xffffff12, x2 = 0x00000004, x3 = 0x0ffffff1
 srli    x1 = 0xffffff12, x3 = 0x0ffffff1
 sub     x1 = 0x00000123, x2 = 0x00000124, x3 = 0xffffffff
