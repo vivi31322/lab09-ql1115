@@ -1,8 +1,8 @@
-package lab10.PiplinedCPU.DatapathModule
+package acal_lab09.PiplinedCPU.DatapathModule
 
 import chisel3._
 import chisel3.util._
-import lab10.PiplinedCPU.DatapathModule.DatapathComponent._
+import acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent._
 
 class Path_EXE(addrWidth:Int) extends Module {
     val io = IO(new Bundle{
@@ -22,7 +22,7 @@ class Path_EXE(addrWidth:Int) extends Module {
         val EXE_rs2_rdata_out = Output(UInt(32.W))
         val E_BrEq = Output(Bool())
         val E_BrLT = Output(Bool())
-        
+
         // Test
         val alu_src1 = Output(UInt(32.W))
         val alu_src2 = Output(UInt(32.W))

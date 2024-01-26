@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU.DatapathModule
+package acal_lab09.PiplinedCPU.DatapathModule
 
 import chisel3._
 import chisel3.util._
@@ -9,7 +9,7 @@ class Path_MEM(addrWidth:Int) extends Module {
         val MEM_pc_in = Input(UInt(addrWidth.W))
         val MEM_alu_out_in = Input(UInt(32.W))
         val MEM_DM_wdata_in = Input(UInt(32.W))
-        
+
         val MEM_pc_plus_4 = Output(UInt(addrWidth.W))
         val MEM_alu_out = Output(UInt(32.W))
         val MEM_ld_data = Output(UInt(32.W))
@@ -19,7 +19,7 @@ class Path_MEM(addrWidth:Int) extends Module {
         val Mem_Write_Data = Output(UInt(32.W))
         val Mem_Data = Input(UInt(32.W))
     })
-    
+
     // pc + 4 for write back data
     io.MEM_pc_plus_4 := io.MEM_pc_in + 4.U(addrWidth.W)
 

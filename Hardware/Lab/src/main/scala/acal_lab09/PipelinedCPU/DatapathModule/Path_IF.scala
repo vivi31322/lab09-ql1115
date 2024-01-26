@@ -1,8 +1,8 @@
-package lab10.PiplinedCPU.DatapathModule
+package acal_lab09.PiplinedCPU.DatapathModule
 
 import chisel3._
 import chisel3.util._
-import lab10.PiplinedCPU.pc_sel_map._
+import acal_lab09.PiplinedCPU.pc_sel_map._
 
 class Path_IF(addrWidth:Int) extends Module {
     val io = IO(new Bundle{
@@ -12,7 +12,7 @@ class Path_IF(addrWidth:Int) extends Module {
         val EXE_pc_in = Input(UInt(addrWidth.W))
         val EXE_target_pc_in = Input(UInt(addrWidth.W))
         val Mem_data = Input(UInt(32.W))
-        
+
 
         val next_pc = Output(UInt(addrWidth.W))
         val Mem_Addr = Output(UInt(addrWidth.W))
