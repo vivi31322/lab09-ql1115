@@ -1,9 +1,9 @@
-package lab10.PiplinedCPU.DatapathModule.DatapathComponent
+package acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent
 
 import chisel3._
 import chisel3.util._
 
-import lab10.PiplinedCPU.inst_type._
+import acal_lab09.PiplinedCPU.inst_type._
 
 class ImmGen extends Module{
     val io = IO(new Bundle{
@@ -11,7 +11,7 @@ class ImmGen extends Module{
         val ImmSel = Input(UInt(3.W))
         val imm = Output(UInt(32.W))
     })
-    
+
     val inst_shift = Wire(UInt(32.W))
     inst_shift := Cat(io.inst_31_7,0.U(7.W))
 
@@ -30,7 +30,7 @@ class ImmGen extends Module{
                  inst_shift(30,25),
                  inst_shift(11,8),
                  0.U(1.W)).asSInt,
-        
+
         //S-type
         S_type -> Cat(inst_shift(31),
                 inst_shift(30,25),
@@ -48,6 +48,6 @@ class ImmGen extends Module{
                  0.U(1.W)).asSInt,
 
     ))
-    
+
     io.imm := simm.asUInt
 }

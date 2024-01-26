@@ -1,8 +1,8 @@
-package lab10.PiplinedCPU.DatapathModule
+package acal_lab09.PiplinedCPU.DatapathModule
 
 import chisel3._
 import chisel3.util._
-import lab10.PiplinedCPU.DatapathModule.DatapathComponent._
+import acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent._
 
 class Path_ID(addrWidth:Int) extends Module {
     val io = IO(new Bundle{

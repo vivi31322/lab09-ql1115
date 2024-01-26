@@ -26,10 +26,10 @@ def javacOptionsVersion(scalaVersion: String): Seq[String] = {
   }
 }
 
-//Setting Key ： Project Information 
+//Setting Key ： Project Information
 organization := "edu.ncku.playlab"
 
-name := "lab10"
+name := "acal_lab09"
 
 version := "0.1.0"
 
