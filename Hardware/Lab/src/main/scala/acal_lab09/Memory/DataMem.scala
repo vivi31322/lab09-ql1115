@@ -1,25 +1,25 @@
-package lab10.Memory
+package acal_lab09.Memory
 
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFile
-import lab10.PiplinedCPU.wide._
+import acal_lab09.PiplinedCPU.wide._
 
 class DataMem(bits:Int) extends Module {
   val io = IO(new Bundle {
     val Length = Input(UInt(4.W))
     val raddr = Input(UInt(bits.W))
     val rdata = Output(UInt(32.W))
-    
+
     val wen   = Input(Bool())
     val waddr = Input(UInt(bits.W))
     val wdata = Input(UInt(32.W))
   })
   val DATA_OFFSET = 1<<bits
-  
+
   val memory = Mem((1<<(bits)), UInt(8.W))
   loadMemoryFromFile(memory, "./src/main/resource/data.hex")
-  
+
   val srdata = Wire(SInt(32.W))
 
   io.rdata := srdata.asUInt

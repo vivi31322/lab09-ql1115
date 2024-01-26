@@ -1,11 +1,11 @@
-package lab10.MemIF
+package acal_lab09.MemIF
 
 import chisel3._
 import chisel3.util._
 
 class MemIF_CPU(val addrWidth: Int, val dataWidth: Int) extends Bundle {
-  val Mem_R = Output(Bool()) 
-  val Mem_W = Output(Bool()) 
+  val Mem_R = Output(Bool())
+  val Mem_W = Output(Bool())
   val Length = Output(UInt(4.W))
 	val Valid = Input(Bool())
 
@@ -19,8 +19,8 @@ class MemIF_CPU(val addrWidth: Int, val dataWidth: Int) extends Bundle {
 }
 
 class MemIF_MEM(val addrWidth: Int, val dataWidth: Int) extends Bundle {
-  val Mem_R = Input(Bool()) 
-  val Mem_W = Input(Bool()) 
+  val Mem_R = Input(Bool())
+  val Mem_W = Input(Bool())
   val Length = Input(UInt(4.W))
 	val Valid = Output(Bool())
 

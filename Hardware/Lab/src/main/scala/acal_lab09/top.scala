@@ -1,11 +1,11 @@
-package lab10
+package acal_lab09
 
 import chisel3._
 import chisel3.util._
 
-import lab10.PiplinedCPU._
-import lab10.Memory._
-import lab10.MemIF._
+import acal_lab09.PiplinedCPU._
+import acal_lab09.Memory._
+import acal_lab09.MemIF._
 
 class top extends Module {
     val io = IO(new Bundle{
@@ -42,17 +42,17 @@ class top extends Module {
     val cpu = Module(new PiplinedCPU(15,32))
     val im = Module(new InstMem(15))
     val dm = Module(new DataMem(15))
-    
+
     // Piplined CPU
     cpu.io.InstMem.rdata := im.io.inst
-    cpu.io.DataMem.rdata := dm.io.rdata 
+    cpu.io.DataMem.rdata := dm.io.rdata
 
     cpu.io.InstMem.Valid := true.B // Direct to Mem
     cpu.io.DataMem.Valid := true.B // Direct to Mem
 
     // Insruction Memory
     im.io.raddr := cpu.io.InstMem.raddr
-    
+
     //Data Memory
     dm.io.Length := cpu.io.DataMem.Length
     dm.io.raddr := cpu.io.DataMem.raddr

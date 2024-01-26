@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU.DatapathModule.DatapathComponent
+package acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent
 
 import chisel3._
 
@@ -17,7 +17,7 @@ class RegFile(readPorts:Int) extends Module {
 
   // 2. the reset value of all regs is their index
   // val regs = RegInit(VecInit(Seq.range(0,32).map{x=>x.U(32.W)}))
-  
+
   //Wiring
   (io.rdata zip io.raddr).map{case(data,addr)=>data:=regs(addr)}
   when(io.wen) {regs(io.waddr) := io.wdata}

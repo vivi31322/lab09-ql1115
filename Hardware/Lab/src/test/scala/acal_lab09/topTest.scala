@@ -1,4 +1,4 @@
-package lab10
+package acal_lab09
 
 import scala.io.Source
 import chisel3.iotesters.{PeekPokeTester,Driver}
@@ -47,10 +47,10 @@ class topTest(dut:top) extends PeekPokeTester(dut){
 
         println(s"[PC_IF ]${"%8d".format(PC_IF)} [Inst] ${"%-25s".format(lines(PC_IF>>2))} ")
         println(s"[PC_ID ]${"%8d".format(PC_ID)} [Inst] ${"%-25s".format(lines(PC_ID>>2))} ")
-        println(s"[PC_EXE]${"%8d".format(PC_EXE)} [Inst] ${"%-25s".format(lines(PC_EXE>>2))} "+ 
+        println(s"[PC_EXE]${"%8d".format(PC_EXE)} [Inst] ${"%-25s".format(lines(PC_EXE>>2))} "+
                 s"[EXE src1]${"%8s".format(EXE_src1)} [EXE src2]${"%8s".format(EXE_src2)} "+
                 s"[Br taken] ${"%1d".format(E_BT)} ")
-        println(s"                                                  "+ 
+        println(s"                                                  "+
                 s"[ALU src1]${"%8s".format(ALU_src1)} [ALU src2]${"%8s".format(ALU_src2)} "+
                 s"[ALU Out]${"%8s".format(alu_out)}")
         println(s"[PC_MEM]${"%8d".format(PC_MEM)} [Inst] ${"%-25s".format(lines(PC_MEM>>2))} "+
@@ -59,7 +59,7 @@ class topTest(dut:top) extends PeekPokeTester(dut){
                 s"[ WB reg ]${"%8d".format(WB_reg)} [WB  data]${"%8s".format(WB_wdata)}")
         println(s"[Flush ] ${"%1d".format(Flush)} [Stall_MA ] ${"%1d".format(Stall_MA)} [Stall_DH ] ${"%1d".format(Stall_DH)} ")
         println("==============================================")
-        
+
         /* Lab 10_3 performance counter */
         Cycle_Count += 1 //Cycle
         if(Stall_MA==0 && Stall_DH==0){
@@ -124,7 +124,7 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     println(s"[Conditional Branch Hit Count   ] ${"%8d".format(Conditional_Branch_Hit_Count)}")
     println(s"[Unconditional Branch Hit Count ] ${"%8d".format(Unconditional_Branch_Hit_Count)}")
     println(s"[Flush Count                    ] ${"%8d".format(Flush_Count)}")
-    
+
 
     // Performance Analysis
     println("==============================================================")

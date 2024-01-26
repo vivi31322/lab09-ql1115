@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU.DatapathModule.DatapathComponent
+package acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent
 
 import chisel3._
 import chisel3.util._
@@ -21,7 +21,7 @@ class BranchComp extends Module{
     }.otherwise{
       when(io.src1.asSInt < io.src2.asSInt) { lt := true.B }
     }
-    
+
     eq := Mux(io.src1===io.src2,true.B,false.B)
 
     io.BrEq := eq

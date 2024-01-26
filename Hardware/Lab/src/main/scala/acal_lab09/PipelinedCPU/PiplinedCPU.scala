@@ -1,23 +1,23 @@
-package lab10.PiplinedCPU
+package acal_lab09.PiplinedCPU
 
 import chisel3._
 import chisel3.util._
 
-import lab10.Memory._
-import lab10.MemIF._
-import lab10.PiplinedCPU.StageRegister._
-import lab10.PiplinedCPU.Controller._
-import lab10.PiplinedCPU.DatapathModule._
-import lab10.PiplinedCPU.DatapathModule.DatapathComponent._
-import lab10.PiplinedCPU.opcode_map._
+import acal_lab09.Memory._
+import acal_lab09.MemIF._
+import acal_lab09.PiplinedCPU.StageRegister._
+import acal_lab09.PiplinedCPU.Controller._
+import acal_lab09.PiplinedCPU.DatapathModule._
+import acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent._
+import acal_lab09.PiplinedCPU.opcode_map._
 
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     val io = IO(new Bundle{
         //InstMem
-        val InstMem = new MemIF_CPU(memAddrWidth, memDataWidth) 
-        
+        val InstMem = new MemIF_CPU(memAddrWidth, memDataWidth)
+
         //DataMem
-        val DataMem = new MemIF_CPU(memAddrWidth, memDataWidth) 
+        val DataMem = new MemIF_CPU(memAddrWidth, memDataWidth)
 
         //System
         val regs = Output(Vec(32,UInt(32.W)))
@@ -70,7 +70,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_IF.io.PCSel := contorller.io.PCSel
     datapath_IF.io.IF_pc_in := stage_IF.io.pc
     datapath_IF.io.EXE_pc_in := stage_EXE.io.pc
-    datapath_IF.io.EXE_target_pc_in := datapath_EXE.io.EXE_target_pc_out 
+    datapath_IF.io.EXE_target_pc_in := datapath_EXE.io.EXE_target_pc_out
     datapath_IF.io.Mem_data := io.InstMem.rdata(31,0)
 
     // --- Insruction Memory Interface
@@ -112,7 +112,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_EXE.io.E_BSel := contorller.io.E_BSel
     datapath_EXE.io.E_BrUn := contorller.io.E_BrUn
     datapath_EXE.io.E_ALUSel := contorller.io.E_ALUSel
-    
+
     // === MEM stage reg ==============================================================
     stage_MEM.io.Stall := contorller.io.Hcf        // To Be Modified
     stage_MEM.io.pc_in := stage_EXE.io.pc
@@ -158,7 +158,7 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     contorller.io.E_BrLT := datapath_EXE.io.E_BrLT
 
     contorller.io.ID_pc := stage_ID.io.pc
-    
+
     contorller.io.EXE_target_pc := datapath_EXE.io.EXE_target_pc_out
 
     contorller.io.IM_Valid := io.InstMem.Valid

@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU
+package acal_lab09.PiplinedCPU
 
 import chisel3._
 import chisel3.util._
