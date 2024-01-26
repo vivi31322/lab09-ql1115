@@ -1,13 +1,13 @@
-package acal_lab09.PiplinedCPU
+package lab10.PiplinedCPU
 
 import chisel3._
 import chisel3.util._
 
-import acal_lab09.MemIF._
-import acal_lab09.PiplinedCPU.StageRegister._
-import acal_lab09.PiplinedCPU.Controller._
-import acal_lab09.PiplinedCPU.DatapathModule._
-import acal_lab09.PiplinedCPU.opcode_map._
+import lab10.MemIF._
+import lab10.PiplinedCPU.StageRegister._
+import lab10.PiplinedCPU.Controller._
+import lab10.PiplinedCPU.DatapathModule._
+import lab10.PiplinedCPU.opcode_map._
 
 class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     val io = IO(new Bundle{
@@ -169,7 +169,9 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     /* Test */
     io.E_Branch_taken := contorller.io.E_Branch_taken
+    // TODO : Flush signal should be modified
     io.Flush := contorller.io.Flush
+    // TODO : Stall signal should be modified
     io.Stall_DH := contorller.io.Stall_DH
     io.Stall_MA := contorller.io.Stall_MA
     io.IF_PC := stage_IF.io.pc
