@@ -1,28 +1,28 @@
-package lab10.PiplinedCPU.Controller
+package acal_lab09.PiplinedCPU.Controller
 
 import chisel3._
 import chisel3.util._
 
-import lab10.PiplinedCPU.opcode_map._
-import lab10.PiplinedCPU.condition._
-import lab10.PiplinedCPU.inst_type._
-import lab10.PiplinedCPU.alu_op_map._
-import lab10.PiplinedCPU.pc_sel_map._
-import lab10.PiplinedCPU.wb_sel_map._
-import lab10.PiplinedCPU.forwarding_sel_map._
+import acal_lab09.PiplinedCPU.opcode_map._
+import acal_lab09.PiplinedCPU.condition._
+import acal_lab09.PiplinedCPU.inst_type._
+import acal_lab09.PiplinedCPU.alu_op_map._
+import acal_lab09.PiplinedCPU.pc_sel_map._
+import acal_lab09.PiplinedCPU.wb_sel_map._
+import acal_lab09.PiplinedCPU.forwarding_sel_map._
 
 class Controller(memAddrWidth: Int) extends Module {
   val io = IO(new Bundle {
     // Memory control signal interface
-    val IM_Mem_R = Output(Bool()) 
-    val IM_Mem_W = Output(Bool()) 
+    val IM_Mem_R = Output(Bool())
+    val IM_Mem_W = Output(Bool())
     val IM_Length = Output(UInt(4.W))
-    val IM_Valid = Input(Bool()) 
+    val IM_Valid = Input(Bool())
 
-    val DM_Mem_R = Output(Bool()) 
-    val DM_Mem_W = Output(Bool()) 
+    val DM_Mem_R = Output(Bool())
+    val DM_Mem_W = Output(Bool())
     val DM_Length = Output(UInt(4.W))
-    val DM_Valid = Input(Bool()) 
+    val DM_Valid = Input(Bool())
 
     // branch Comp.
     val E_BrEq = Input(Bool())
@@ -63,7 +63,7 @@ class Controller(memAddrWidth: Int) extends Module {
 
     val Hcf = Output(Bool())
   })
-  // Inst Decode for each stage 
+  // Inst Decode for each stage
   val IF_opcode = io.IF_Inst(6, 0)
 
   val ID_opcode = io.ID_Inst(6, 0)
@@ -91,7 +91,7 @@ class Controller(memAddrWidth: Int) extends Module {
             "b000".U(3.W) -> io.E_BrEq.asUInt,
           )),
         ))    // To Be Modified
-        
+
   io.E_En := E_En
   io.E_Branch_taken := E_Branch_taken
 
@@ -123,7 +123,7 @@ class Controller(memAddrWidth: Int) extends Module {
     LUI -> 2.U,
   ))    // To Be Modified
   io.E_BSel := 1.U // To Be Modified
-  
+
   io.E_ALUSel := MuxLookup(EXE_opcode, (Cat(0.U(7.W), "b11111".U, 0.U(3.W))), Seq(
     OP -> (Cat(EXE_funct7, "b11111".U, EXE_funct3)),
     OP_IMM -> (Cat(0.U(7.W), "b11111".U, EXE_funct3))
@@ -146,7 +146,7 @@ class Controller(memAddrWidth: Int) extends Module {
     LUI -> true.B,
   ))  // To Be Modified
 
-  
+
   io.W_WBSel := MuxLookup(WB_opcode, ALUOUT, Seq(
     LOAD -> LD_DATA,
   )) // To Be Modified
@@ -155,8 +155,8 @@ class Controller(memAddrWidth: Int) extends Module {
   io.Hcf := (IF_opcode === HCF)
 
   /****************** Data Hazard ******************/
-  // Use rs in ID stage 
-  val is_D_use_rs1 = Wire(Bool()) 
+  // Use rs in ID stage
+  val is_D_use_rs1 = Wire(Bool())
   val is_D_use_rs2 = Wire(Bool())
   is_D_use_rs1 := MuxLookup(ID_opcode,false.B,Seq(
     BRANCH -> true.B,
@@ -177,7 +177,7 @@ class Controller(memAddrWidth: Int) extends Module {
 
   is_D_rs1_W_rd_overlap := is_D_use_rs1 && is_W_use_rd && (ID_rs1 === WB_rd) && (WB_rd =/= 0.U(5.W))
   is_D_rs2_W_rd_overlap := is_D_use_rs2 && is_W_use_rd && (ID_rs2 === WB_rd) && (WB_rd =/= 0.U(5.W))
- 
+
   // Control signal - Stall
   // Stall for Data Hazard
   io.Stall_WB_ID_DH := (is_D_rs1_W_rd_overlap || is_D_rs2_W_rd_overlap)

@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU.StageRegister
+package acal_lab09.PiplinedCPU.StageRegister
 
 import chisel3._
 import chisel3.util._
@@ -6,7 +6,7 @@ import chisel3.util._
 class Reg_MEM(addrWidth:Int) extends Module {
     val io = IO(new Bundle{
         val Stall = Input(Bool())
-        
+
         val pc_in = Input(UInt(addrWidth.W))
         val inst_in = Input(UInt(32.W))
         val alu_out_in = Input(UInt(32.W))
@@ -17,7 +17,7 @@ class Reg_MEM(addrWidth:Int) extends Module {
         val alu_out = Output(UInt(32.W))
         val DM_wdata = Output(UInt(32.W))
     })
-    
+
     // stage Registers
     val InstReg = RegInit(0.U(32.W))
     val pcReg =  RegInit(0.U(addrWidth.W))
@@ -36,7 +36,7 @@ class Reg_MEM(addrWidth:Int) extends Module {
         aluReg := io.alu_out_in
         wdataReg := io.DM_wdata_in
     }
- 
+
     io.inst := InstReg
     io.pc := pcReg
     io.alu_out := aluReg

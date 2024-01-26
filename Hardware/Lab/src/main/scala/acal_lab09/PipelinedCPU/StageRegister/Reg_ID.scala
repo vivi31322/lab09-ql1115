@@ -1,4 +1,4 @@
-package lab10.PiplinedCPU.StageRegister
+package acal_lab09.PiplinedCPU.StageRegister
 
 import chisel3._
 import chisel3.util._
@@ -14,12 +14,12 @@ class Reg_ID(addrWidth:Int) extends Module {
         val pc = Output(UInt(addrWidth.W))
         val inst = Output(UInt(32.W))
     })
-    
+
     // stage Registers
     val InstReg = RegInit(0.U(32.W))
     val pcReg =  RegInit(0.U(15.W))
     /*** stage Registers Action ***/
-    
+
     when(io.Stall){
         InstReg := InstReg
         pcReg := pcReg
@@ -30,7 +30,7 @@ class Reg_ID(addrWidth:Int) extends Module {
         InstReg := io.inst_in
         pcReg := io.pc_in
     }
- 
+
     io.inst := InstReg
     io.pc := pcReg
 }

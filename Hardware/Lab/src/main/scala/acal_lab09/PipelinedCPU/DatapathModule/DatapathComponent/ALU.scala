@@ -1,10 +1,10 @@
-package lab10.PiplinedCPU.DatapathModule.DatapathComponent
+package acal_lab09.PiplinedCPU.DatapathModule.DatapathComponent
 
 import chisel3._
-import chisel3.util._ 
+import chisel3.util._
 
-import lab10.PiplinedCPU.opcode_map._
-import lab10.PiplinedCPU.alu_op_map._
+import acal_lab09.PiplinedCPU.opcode_map._
+import acal_lab09.PiplinedCPU.alu_op_map._
 
 class ALUIO extends Bundle{
   val src1    = Input(UInt(32.W))
@@ -14,8 +14,8 @@ class ALUIO extends Bundle{
 }
 
 class ALU extends Module{
-  val io = IO(new ALUIO) 
-  
+  val io = IO(new ALUIO)
+
   io.out := 0.U
   switch(io.ALUSel){
     is(ADD ){io.out := io.src1+io.src2}
