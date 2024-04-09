@@ -1,7 +1,7 @@
 #=======================================================================
 # Makefile for riscv-tests/isa
 #-----------------------------------------------------------------------
-XLEN := 32
+XLEN := 64
 
 # ----------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ vpath %.S $(src_dir)
 	rm ./out/hex/$<-text-byte
 	rm ./out/hex/$<-data
 	rm ./out/hex/$<-data-byte
-	
+
 %.dump: %
 	$(RISCV_OBJDUMP) ./out/obj/$< > ./out/dump/$@
 %.asm: %
@@ -105,15 +105,15 @@ junk += $(tests) $(tests_dump) $(tests_hex) $(tests_asm)
 # Default
 
 all: dump asm hex
- 
+
 dump: MKDIR_DUMP $(tests_dump)
 asm: MKDIR_ASM $(tests_asm)
 hex: MKDIR_HEX $(tests_hex)
 
 MKDIR_OBJ:
-	mkdir -p ./out/obj 
+	mkdir -p ./out/obj
 MKDIR_DUMP: MKDIR_OBJ
-	mkdir -p ./out/dump  
+	mkdir -p ./out/dump
 MKDIR_ASM: MKDIR_OBJ
 	mkdir -p ./out/asm
 MKDIR_HEX: MKDIR_OBJ
@@ -125,4 +125,4 @@ MKDIR_HEX: MKDIR_OBJ
 
 clean:
 	rm -rf $(junk)
-	rm -rf ./out 
+	rm -rf ./out
