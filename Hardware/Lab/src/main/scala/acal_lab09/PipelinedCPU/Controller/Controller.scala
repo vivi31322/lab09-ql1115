@@ -110,12 +110,14 @@ class Controller(memAddrWidth: Int) extends Module {
     LOAD -> I_type,
     BRANCH -> B_type,
     LUI -> U_type,
+    AUIPC -> U_type,
   )) // To Be Modified
 
   // Control signal - Scalar ALU
   io.E_ASel := MuxLookup(EXE_opcode, 0.U, Seq(
     BRANCH -> 1.U,
     LUI -> 2.U,
+    AUIPC -> 1.U,
   ))    // To Be Modified
   // io.E_BSel := 1.U // To Be Modified
   io.E_BSel := Mux(EXE_opcode === OP, 0.U, 1.U) // ql OP(0b0110011) 代表 R-type，否則是 imm
@@ -140,6 +142,7 @@ class Controller(memAddrWidth: Int) extends Module {
     OP_IMM -> true.B,
     LOAD -> true.B,
     LUI -> true.B,
+    AUIPC -> true.B,
     OP -> true.B, // ql R-type
   ))  // To Be Modified
 
