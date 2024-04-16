@@ -3,6 +3,8 @@ package acal_lab09.PiplinedCPU
 import chisel3._
 import chisel3.util._
 
+// ql RV32I reference: https://www.cs.unh.edu/~pjh/courses/cs520/15spr/riscv-rv32i-instructions.pdf
+
 object opcode_map {
   val LOAD = "b0000011".U
   val STORE = "b0100011".U
@@ -13,6 +15,8 @@ object opcode_map {
   val OP = "b0110011".U
   val AUIPC = "b0010111".U
   val LUI = "b0110111".U
+  val FENCE = "b0001111".U // ql: fence, fence.i
+  val SYS = "b1110011".U   // ql: sbreak, scall, rdcycle(h), rdtime(h), rdinstret(h)
   val HCF = "b0001011".U
 }
 
@@ -34,7 +38,7 @@ object inst_type {
   val U_type = 5.U
 }
 
-object alu_op_map {
+object alu_op_map { // QA ql 應該只要 opcode_map 再搭上 10-bit(funct7+funct3) 就好？
   val ADD = "b0000000_11111_000".U
   val SLL = "b0000000_11111_001".U
   val SLT = "b0000000_11111_010".U

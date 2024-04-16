@@ -117,7 +117,8 @@ class Controller(memAddrWidth: Int) extends Module {
     BRANCH -> 1.U,
     LUI -> 2.U,
   ))    // To Be Modified
-  io.E_BSel := 1.U // To Be Modified
+  // io.E_BSel := 1.U // To Be Modified
+  io.E_BSel := Mux(EXE_opcode === OP, 0.U, 1.U) // ql OP(0b0110011) 代表 R-type，否則是 imm
 
   io.E_ALUSel := MuxLookup(EXE_opcode, (Cat(0.U(7.W), "b11111".U, 0.U(3.W))), Seq(
     OP -> (Cat(EXE_funct7, "b11111".U, EXE_funct3)),
@@ -139,6 +140,7 @@ class Controller(memAddrWidth: Int) extends Module {
     OP_IMM -> true.B,
     LOAD -> true.B,
     LUI -> true.B,
+    OP -> true.B, // ql R-type
   ))  // To Be Modified
 
 
