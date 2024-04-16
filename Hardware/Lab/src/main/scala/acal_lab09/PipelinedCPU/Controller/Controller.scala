@@ -131,8 +131,11 @@ class Controller(memAddrWidth: Int) extends Module {
 
   io.E_ALUSel := MuxLookup(EXE_opcode, (Cat(0.U(7.W), "b11111".U, 0.U(3.W))), Seq(
     OP -> (Cat(EXE_funct7, "b11111".U, EXE_funct3)),
-    OP_IMM -> (Cat(0.U(7.W), "b11111".U, EXE_funct3))
-  )) // To Be Modified
+    // OP_IMM -> (Cat(0.U(7.W), "b11111".U, EXE_funct3)) // ql original
+    OP_IMM -> Mux(EXE_funct3 === "b001".U || EXE_funct3 === "b101".U,  
+            (Cat(EXE_funct7, "b11111".U, EXE_funct3)), (Cat(0.U(7.W), "b11111".U, EXE_funct3))
+    ))
+  ) // To Be Modified
 
   // Control signal - Data Memory
   io.DM_Mem_R := (MEM_opcode===LOAD)
