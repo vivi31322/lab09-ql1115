@@ -110,6 +110,7 @@ class Controller(memAddrWidth: Int) extends Module {
   io.D_ImmSel := MuxLookup(ID_opcode, 0.U, Seq(
     OP_IMM -> I_type,
     LOAD -> I_type,
+    STORE -> S_type,
     BRANCH -> B_type,
     LUI -> U_type,
     AUIPC -> U_type,
