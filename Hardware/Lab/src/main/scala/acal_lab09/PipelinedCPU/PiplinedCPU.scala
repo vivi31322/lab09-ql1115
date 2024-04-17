@@ -102,7 +102,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     stage_EXE.io.imm_in := datapath_ID.io.imm
     stage_EXE.io.rs1_rdata_in := datapath_ID.io.ID_rs1_rdata
     stage_EXE.io.rs2_rdata_in := datapath_ID.io.ID_rs2_rdata
-
     // EXE Block Datapath
     datapath_EXE.io.EXE_pc_in := stage_EXE.io.pc
     datapath_EXE.io.EXE_imm_in := stage_EXE.io.imm
@@ -112,7 +111,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_EXE.io.E_BSel := contorller.io.E_BSel
     datapath_EXE.io.E_BrUn := contorller.io.E_BrUn
     datapath_EXE.io.E_ALUSel := contorller.io.E_ALUSel
-
     // === MEM stage reg ==============================================================
     stage_MEM.io.Stall := contorller.io.Hcf        // To Be Modified
     stage_MEM.io.pc_in := stage_EXE.io.pc
@@ -158,7 +156,6 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     contorller.io.E_BrLT := datapath_EXE.io.E_BrLT
 
     contorller.io.ID_pc := stage_ID.io.pc
-
     contorller.io.EXE_target_pc := datapath_EXE.io.EXE_target_pc_out
 
     contorller.io.IM_Valid := io.InstMem.Valid
@@ -171,8 +168,10 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     /* Test */
     io.E_Branch_taken := contorller.io.E_Branch_taken
-    io.Flush := contorller.io.Flush
-    io.Stall_DH := contorller.io.Stall_DH
+    // io.Flush := contorller.io.Flush // ql: original
+    io.Flush := contorller.io.Flush_BH | contorller.io.Flush_WB_ID_DH // QA ql new
+    // io.Stall_DH := contorller.io.Stall_DH // ql: original
+    io.Stall_DH := contorller.io.Stall_WB_ID_DH // QA ql new
     io.Stall_MA := contorller.io.Stall_MA
     io.IF_PC := stage_IF.io.pc
     io.ID_PC := stage_ID.io.pc

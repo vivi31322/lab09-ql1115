@@ -84,12 +84,14 @@ class Controller(memAddrWidth: Int) extends Module {
 
   // Control signal - Branch/Jump
   val E_En = Wire(Bool())
-  E_En := (EXE_opcode===BRANCH)         // To Be Modified
+  E_En := (EXE_opcode===BRANCH || EXE_opcode===JALR || EXE_opcode===JAL)         // To Be Modified
   val E_Branch_taken = Wire(Bool())
   E_Branch_taken := MuxLookup(EXE_opcode, false.B, Seq(
           BRANCH -> MuxLookup(EXE_funct3, false.B, Seq(
             "b000".U(3.W) -> io.E_BrEq.asUInt,
           )),
+          JAL -> true.B, // 因為 JAL 和 JALR 一定會 taken
+          JALR -> true.B,
         ))    // To Be Modified
 
   io.E_En := E_En
@@ -113,21 +115,33 @@ class Controller(memAddrWidth: Int) extends Module {
   io.D_ImmSel := MuxLookup(ID_opcode, 0.U, Seq(
     OP_IMM -> I_type,
     LOAD -> I_type,
+    STORE -> S_type,
     BRANCH -> B_type,
     LUI -> U_type,
+    AUIPC -> U_type,
+    JAL -> J_type,
+    JALR -> I_type, // 小心 JALR 是 I-type，imm 只有 12 位
   )) // To Be Modified
 
   // Control signal - Scalar ALU
+  // E_ASel: 0.U代表來自 rs1，1.U 代表來自 PC，2.U 代表來自zero
   io.E_ASel := MuxLookup(EXE_opcode, 0.U, Seq(
     BRANCH -> 1.U,
     LUI -> 2.U,
+    AUIPC -> 1.U,
+    JAL -> 1.U, // ql rd = cur_pc + 4; next_pc = cur_pc + (imm * 2)
+    JALR -> 0.U // ql rd = cur_pc + 4; next_pc = rs1 + imm & (~0x1) // 小心 alignment 問題
   ))    // To Be Modified
-  io.E_BSel := 1.U // To Be Modified
+  // io.E_BSel := 1.U // To Be Modified
+  io.E_BSel := Mux(EXE_opcode === OP, 0.U, 1.U) // ql OP(0b0110011) 代表 R-type，否則是 imm
 
   io.E_ALUSel := MuxLookup(EXE_opcode, (Cat(0.U(7.W), "b11111".U, 0.U(3.W))), Seq(
     OP -> (Cat(EXE_funct7, "b11111".U, EXE_funct3)),
-    OP_IMM -> (Cat(0.U(7.W), "b11111".U, EXE_funct3))
-  )) // To Be Modified
+    // OP_IMM -> (Cat(0.U(7.W), "b11111".U, EXE_funct3)) // ql original
+    OP_IMM -> Mux(EXE_funct3 === "b001".U || EXE_funct3 === "b101".U,  
+            (Cat(EXE_funct7, "b11111".U, EXE_funct3)), (Cat(0.U(7.W), "b11111".U, EXE_funct3))
+    ))
+  ) // To Be Modified
 
   // Control signal - Data Memory
   io.DM_Mem_R := (MEM_opcode===LOAD)
@@ -144,11 +158,17 @@ class Controller(memAddrWidth: Int) extends Module {
     OP_IMM -> true.B,
     LOAD -> true.B,
     LUI -> true.B,
+    AUIPC -> true.B,
+    OP -> true.B, // ql R-type
+    JAL -> true.B, // ql JAL 和 JALR 會將 pc + 4 寫入 rd
+    JALR -> true.B,
   ))  // To Be Modified
 
 
   io.W_WBSel := MuxLookup(WB_opcode, ALUOUT, Seq(
     LOAD -> LD_DATA,
+    JAL -> PC_PLUS_4, // ql JAL 和 JALR 會將 pc + 4 寫入 rd
+    JALR -> PC_PLUS_4, 
   )) // To Be Modified
 
   // Control signal - Others

@@ -18,6 +18,10 @@ class Reg_ID(addrWidth:Int) extends Module {
     // stage Registers
     val InstReg = RegInit(0.U(32.W))
     val pcReg =  RegInit(0.U(15.W))
+<<<<<<< HEAD
+=======
+
+>>>>>>> gitlab/hw1
     /*** stage Registers Action ***/
 
     when(io.Stall){

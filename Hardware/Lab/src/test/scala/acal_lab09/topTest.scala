@@ -69,14 +69,14 @@ class topTest(dut:top) extends PeekPokeTester(dut){
         var value_7 = String.format("%" + 8 + "s", peek(dut.io.regs(8*i+7)).toInt.toHexString).replace(' ', '0')
 
 
-        println(s"reg[${"%02d".format(8*i+0)}]：${value_0} " +
-                s"reg[${"%02d".format(8*i+1)}]：${value_1} " +
-                s"reg[${"%02d".format(8*i+2)}]：${value_2} " +
-                s"reg[${"%02d".format(8*i+3)}]：${value_3} " +
-                s"reg[${"%02d".format(8*i+4)}]：${value_4} " +
-                s"reg[${"%02d".format(8*i+5)}]：${value_5} " +
-                s"reg[${"%02d".format(8*i+6)}]：${value_6} " +
-                s"reg[${"%02d".format(8*i+7)}]：${value_7} ")
+        println(s"reg[${"%02d".format(8*i+0)}]:${value_0} " +
+                s"reg[${"%02d".format(8*i+1)}]:${value_1} " +
+                s"reg[${"%02d".format(8*i+2)}]:${value_2} " +
+                s"reg[${"%02d".format(8*i+3)}]:${value_3} " +
+                s"reg[${"%02d".format(8*i+4)}]:${value_4} " +
+                s"reg[${"%02d".format(8*i+5)}]:${value_5} " +
+                s"reg[${"%02d".format(8*i+6)}]:${value_6} " +
+                s"reg[${"%02d".format(8*i+7)}]:${value_7} ")
     }
 }
 
