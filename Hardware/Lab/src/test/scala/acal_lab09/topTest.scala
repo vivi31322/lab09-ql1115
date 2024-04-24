@@ -11,6 +11,16 @@ class topTest(dut:top) extends PeekPokeTester(dut){
     val filename = "./src/main/resource/inst.asm"
     val lines = Source.fromFile(filename).getLines.toList
 
+    /* Lab 9_3 performance counter */
+    var Cycle_Count = 0
+    var Inst_Count = 0
+    var Conditional_Branch_Count = 0
+    var Unconditional_Branch_Count = 0
+    var Conditional_Branch_Hit_Count = 0
+    var Unconditional_Branch_Hit_Count = 0
+    var Flush_Count = 0
+    /* Lab 9_3 performance counter */
+
     while(!peek(dut.io.Hcf)){
         var PC_IF = peek(dut.io.IF_PC).toInt
         var PC_ID = peek(dut.io.ID_PC).toInt
@@ -50,6 +60,31 @@ class topTest(dut:top) extends PeekPokeTester(dut){
         println(s"[Flush ] ${"%1d".format(Flush)} [Stall_MA ] ${"%1d".format(Stall_MA)} [Stall_DH ] ${"%1d".format(Stall_DH)} ")
         println("==============================================")
 
+        /* Lab 10_3 performance counter */
+        Cycle_Count += 1 //Cycle
+        if(Stall_MA==0 && Stall_DH==0){
+            Inst_Count += 1   // Not Stall, read inst
+
+            if(EXE_Branch==1){
+                Conditional_Branch_Count += 1
+                if(Flush == 0){
+                    Conditional_Branch_Hit_Count += 1
+                }else{
+                    Flush_Count += 1
+                }
+            }
+            if(EXE_Jump==1){
+                Unconditional_Branch_Count += 1
+                if(Flush == 0){
+                    Unconditional_Branch_Hit_Count += 1
+                }else{
+                    Flush_Count += 1
+                }
+            }
+        }
+        /* Lab 10_3 performance counter */
+
+
         step(1)
     }
     step(1)
@@ -78,6 +113,27 @@ class topTest(dut:top) extends PeekPokeTester(dut){
                 s"reg[${"%02d".format(8*i+6)}]:${value_6} " +
                 s"reg[${"%02d".format(8*i+7)}]:${value_7} ")
     }
+
+    /* Lab 9_3 performance counter */
+    // Performance Counter
+    println("==============================================================")
+    println("Performance Counter:")
+    println(s"[Cycle Count                    ] ${"%8d".format(Cycle_Count)}")
+    println(s"[Inst Count                     ] ${"%8d".format(Inst_Count)}")
+    println(s"[Conditional Branch Count       ] ${"%8d".format(Conditional_Branch_Count)}")
+    println(s"[Unconditional Branch Count     ] ${"%8d".format(Unconditional_Branch_Count)}")
+    println(s"[Conditional Branch Hit Count   ] ${"%8d".format(Conditional_Branch_Hit_Count)}")
+    println(s"[Unconditional Branch Hit Count ] ${"%8d".format(Unconditional_Branch_Hit_Count)}")
+    println(s"[Flush Count                    ] ${"%8d".format(Flush_Count)}")
+
+
+    // Performance Analysis
+    println("==============================================================")
+    println("Performance Analysis:")
+    println(s"[CPI                            ] ${"%8f".format(Cycle_Count.toFloat/Inst_Count.toFloat)}")
+    println("==============================================================")
+    /* Lab 9_3 performance counter */
+
 }
 
 object topTest extends App{
