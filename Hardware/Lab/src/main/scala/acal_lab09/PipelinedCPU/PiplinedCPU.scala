@@ -63,7 +63,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     /* Wire Connect */
     // === IF stage reg (PC reg) ======================================================
-    stage_IF.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH) // To Be Modified
+    stage_IF.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH
+                        ||contorller.io.Stall_MEM_ID_DH||contorller.io.Stall_EXE_ID_DH) // To Be Modified
     stage_IF.io.next_pc_in := datapath_IF.io.next_pc
 
     // IF Block Datapath
@@ -83,7 +84,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
 
     // === ID stage reg ==============================================================
     stage_ID.io.Flush := contorller.io.Flush_BH    // To Be Modified
-    stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH)      // To Be Modified
+    stage_ID.io.Stall := (contorller.io.Hcf||contorller.io.Stall_WB_ID_DH
+                    ||contorller.io.Stall_MEM_ID_DH||contorller.io.Stall_EXE_ID_DH)      // To Be Modified
     stage_ID.io.inst_in := datapath_IF.io.inst
     stage_ID.io.pc_in := stage_IF.io.pc
 
@@ -95,7 +97,8 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     datapath_ID.io.ImmSel := contorller.io.D_ImmSel
 
     // === EXE stage reg ==============================================================
-    stage_EXE.io.Flush := (contorller.io.Flush_BH||contorller.io.Flush_WB_ID_DH) // To Be Modified
+    stage_EXE.io.Flush := (contorller.io.Flush_BH||contorller.io.Flush_WB_ID_DH
+                        ||contorller.io.Flush_MEM_ID_DH||contorller.io.Flush_EXE_ID_DH) // To Be Modified
     stage_EXE.io.Stall := contorller.io.Hcf   // To Be Modified
     stage_EXE.io.pc_in := stage_ID.io.pc
     stage_EXE.io.inst_in := stage_ID.io.inst
@@ -169,9 +172,9 @@ class PiplinedCPU(memAddrWidth: Int, memDataWidth: Int) extends Module {
     /* Test */
     io.E_Branch_taken := contorller.io.E_Branch_taken
     // io.Flush := contorller.io.Flush // ql: original
-    io.Flush := contorller.io.Flush_BH | contorller.io.Flush_WB_ID_DH // QA ql new
+    io.Flush := contorller.io.Flush_BH | contorller.io.Flush_WB_ID_DH | contorller.io.Flush_MEM_ID_DH | contorller.io.Flush_EXE_ID_DH // QA ql new
     // io.Stall_DH := contorller.io.Stall_DH // ql: original
-    io.Stall_DH := contorller.io.Stall_WB_ID_DH // QA ql new
+    io.Stall_DH := contorller.io.Stall_WB_ID_DH | contorller.io.Stall_MEM_ID_DH | contorller.io.Stall_EXE_ID_DH // QA ql new
     io.Stall_MA := contorller.io.Stall_MA
     io.IF_PC := stage_IF.io.pc
     io.ID_PC := stage_ID.io.pc

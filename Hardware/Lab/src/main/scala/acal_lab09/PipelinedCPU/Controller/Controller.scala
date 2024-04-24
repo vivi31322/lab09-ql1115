@@ -38,10 +38,14 @@ class Controller(memAddrWidth: Int) extends Module {
     // Flush
     val Flush_WB_ID_DH  = Output(Bool())
     val Flush_BH  = Output(Bool()) // branch hazard flush
+    val Flush_MEM_ID_DH  = Output(Bool())
+    val Flush_EXE_ID_DH  = Output(Bool())
 
     // Stall
     // To Be Modified
     val Stall_WB_ID_DH = Output(Bool()) //TBD
+    val Stall_MEM_ID_DH = Output(Bool())
+    val Stall_EXE_ID_DH = Output(Bool())
     val Stall_MA = Output(Bool()) //TBD
 
     // inst
@@ -73,9 +77,11 @@ class Controller(memAddrWidth: Int) extends Module {
   val EXE_opcode = io.EXE_Inst(6, 0)
   val EXE_funct3 = io.EXE_Inst(14, 12)
   val EXE_funct7 = io.EXE_Inst(31, 25)
+  val EXE_rd = io.EXE_Inst(11, 7)
 
   val MEM_opcode = io.MEM_Inst(6, 0)
   val MEM_funct3 = io.MEM_Inst(14, 12)
+  val MEM_rd = io.MEM_Inst(11, 7)
 
 
   val WB_opcode = io.WB_Inst(6, 0)
@@ -180,31 +186,83 @@ class Controller(memAddrWidth: Int) extends Module {
   val is_D_use_rs2 = Wire(Bool())
   is_D_use_rs1 := MuxLookup(ID_opcode,false.B,Seq(
     BRANCH -> true.B,
+    OP -> true.B,
+    OP_IMM -> true.B,
+    JALR -> true.B,
+    LOAD -> true.B,
+    STORE -> true.B
   ))   // To Be Modified
   is_D_use_rs2 := MuxLookup(ID_opcode,false.B,Seq(
     BRANCH -> true.B,
+    OP -> true.B,
+    STORE -> true.B,
   ))   // To Be Modified
 
   // Use rd in WB stage
   val is_W_use_rd = Wire(Bool())
   is_W_use_rd := MuxLookup(WB_opcode,false.B,Seq(
     OP_IMM -> true.B,
-  ))   // To Be Modified
+    OP -> true.B,
+    OP_IMM -> true.B,
+    AUIPC -> true.B,
+    LUI -> true.B,
+    JAL -> true.B,
+    JALR -> true.B,
+    LOAD -> true.B,
+  ))
+
+  // Use rd in MEM stage
+  val is_M_use_rd = Wire(Bool())
+  is_M_use_rd := MuxLookup(MEM_opcode,false.B,Seq(
+    OP_IMM -> true.B,
+    OP -> true.B,
+    OP_IMM -> true.B,
+    AUIPC -> true.B,
+    LUI -> true.B,
+    JAL -> true.B,
+    JALR -> true.B,
+    LOAD -> true.B,
+  ))
+
+  // Use rd in EXE stage
+  val is_E_use_rd = Wire(Bool())
+  is_E_use_rd := MuxLookup(EXE_opcode,false.B,Seq(
+    OP_IMM -> true.B,
+    OP -> true.B,
+    OP_IMM -> true.B,
+    AUIPC -> true.B,
+    LUI -> true.B,
+    JAL -> true.B,
+    JALR -> true.B,
+    LOAD -> true.B,
+  ))
 
   // Hazard condition (rd, rs overlap)
-  val is_D_rs1_W_rd_overlap = Wire(Bool())
+  val is_D_rs1_W_rd_overlap = Wire(Bool()) // WB rd, ID rs
   val is_D_rs2_W_rd_overlap = Wire(Bool())
+  val is_D_rs1_M_rd_overlap = Wire(Bool()) // MEM rd, ID rs
+  val is_D_rs2_M_rd_overlap = Wire(Bool())
+  val is_D_rs1_E_rd_overlap = Wire(Bool()) // EXE rd, ID rs
+  val is_D_rs2_E_rd_overlap = Wire(Bool())
 
-  is_D_rs1_W_rd_overlap := is_D_use_rs1 && is_W_use_rd && (ID_rs1 === WB_rd) && (WB_rd =/= 0.U(5.W))
+  is_D_rs1_W_rd_overlap := is_D_use_rs1 && is_W_use_rd && (ID_rs1 === WB_rd) && (WB_rd =/= 0.U(5.W))    // WB ID
   is_D_rs2_W_rd_overlap := is_D_use_rs2 && is_W_use_rd && (ID_rs2 === WB_rd) && (WB_rd =/= 0.U(5.W))
+  is_D_rs1_M_rd_overlap := is_D_use_rs1 && is_M_use_rd && (ID_rs1 === MEM_rd) && (MEM_rd =/= 0.U(5.W))  // MEM ID
+  is_D_rs2_M_rd_overlap := is_D_use_rs2 && is_M_use_rd && (ID_rs2 === MEM_rd) && (MEM_rd =/= 0.U(5.W))
+  is_D_rs1_E_rd_overlap := is_D_use_rs1 && is_E_use_rd && (ID_rs1 === EXE_rd) && (EXE_rd =/= 0.U(5.W))  // EXE ID
+  is_D_rs2_E_rd_overlap := is_D_use_rs2 && is_E_use_rd && (ID_rs2 === EXE_rd) && (EXE_rd =/= 0.U(5.W))
 
   // Control signal - Stall
   // Stall for Data Hazard
   io.Stall_WB_ID_DH := (is_D_rs1_W_rd_overlap || is_D_rs2_W_rd_overlap)
+  io.Stall_MEM_ID_DH := (is_D_rs1_M_rd_overlap || is_D_rs2_M_rd_overlap)
+  io.Stall_EXE_ID_DH := (is_D_rs1_E_rd_overlap || is_D_rs2_E_rd_overlap)
   io.Stall_MA := false.B // Stall for Waiting Memory Access
   // Control signal - Flush
   io.Flush_BH := Predict_Miss
   io.Flush_WB_ID_DH := (is_D_rs1_W_rd_overlap || is_D_rs2_W_rd_overlap)
+  io.Flush_MEM_ID_DH := (is_D_rs1_M_rd_overlap || is_D_rs2_M_rd_overlap) // ql EXE stage 需要 flush
+  io.Flush_EXE_ID_DH := (is_D_rs1_E_rd_overlap || is_D_rs2_E_rd_overlap) // ql EXE stage 需要 flush
 
   // Control signal - Data Forwarding (Bonus)
 
